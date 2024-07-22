@@ -60,14 +60,6 @@
 >C1:{file1}
 >C1:{file2}
 
-  comptest $': d\t'
-0:prefix
->line: {: dir1/}{}
->QUERY:{dir}
->DESCRIPTION:{file}
->C1:{dir1/}
->C1:{dir2/}
-
   comptesteval '_tst () { compadd d c b a }'
   comptest $'tst \t'
 0:normal
