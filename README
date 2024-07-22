@@ -1,0 +1,210 @@
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "README" "" "September 2023" "njhoffman" "Manual For `fzf-tab\' Plugin"
+ \fIhttps://github\.com/Aloxaf/fzf\-tab/actions?query=workflow%3Aci\fR  \fIhttps://github\.com/Aloxaf/fzf\-tab/blob/master/LICENSE\fR
+.
+.P
+Replace zsh\'s default completion selection menu with fzf!
+.
+.P
+ \fIhttps://asciinema\.org/a/293849\fR
+.
+.P
+\fBTable of Contents\fR
+.
+.IP "\[ci]" 4
+\fIfzf\-tab\fR
+.
+.IP "\[ci]" 4
+\fIInstall\fR
+.
+.IP "\[ci]" 4
+\fIManual\fR
+.
+.IP "\[ci]" 4
+\fIAntigen\fR
+.
+.IP "\[ci]" 4
+\fIZinit\fR
+.
+.IP "\[ci]" 4
+\fIOh\-My\-Zsh\fR
+.
+.IP "\[ci]" 4
+\fIPrezto\fR
+.
+.IP "" 0
+
+.
+.IP "\[ci]" 4
+\fIUsage\fR
+.
+.IP "\[ci]" 4
+\fIConfigure\fR
+.
+.IP "\[ci]" 4
+\fIBinary module\fR
+.
+.IP "" 0
+
+.
+.IP "\[ci]" 4
+\fIDifference from other plugins\fR
+.
+.IP "\[ci]" 4
+\fICompatibility with other plugins\fR
+.
+.IP "\[ci]" 4
+\fIRelated projects\fR
+.
+.IP "" 0
+.
+.P
+\fI!\-\- markdown\-toc end \-\-\fR\fBNOTE: fzf\-tab needs to be loaded after \fBcompinit\fR, but before plugins which will wrap widgets, such as zsh\-autosuggestions \fIhttps://github\.com/zsh\-users/zsh\-autosuggestions\fR or fast\-syntax\-highlighting \fIhttps://github\.com/zdharma\-continuum/fast\-syntax\-highlighting\fR!!\fR
+.
+.P
+\fBNOTE 2: fzf\-tab ALSO needs fzf \fIhttps://github\.com/junegunn/fzf\fR installed, otherwise it cannot work!\fR
+.
+.SS "Manual"
+First, clone this repository\.
+.
+.IP "" 4
+.
+.nf
+
+git clone https://github\.com/Aloxaf/fzf\-tab ~/somewhere
+.
+.fi
+.
+.IP "" 0
+.
+.P
+Then add the following line to your \fB~/\.zshrc\fR\.
+.
+.IP "" 4
+.
+.nf
+
+source ~/somewhere/fzf\-tab\.plugin\.zsh
+.
+.fi
+.
+.IP "" 0
+.
+.SS "Antigen"
+.
+.nf
+
+antigen bundle Aloxaf/fzf\-tab
+.
+.fi
+.
+.SS "Zinit"
+.
+.nf
+
+zinit light Aloxaf/fzf\-tab
+.
+.fi
+.
+.SS "Oh\-My\-Zsh"
+Clone this repository to your custom directory and then add \fBfzf\-tab\fR to your plugin list\.
+.
+.IP "" 4
+.
+.nf
+
+git clone https://github\.com/Aloxaf/fzf\-tab ${ZSH_CUSTOM:\-~/\.oh\-my\-zsh/custom}/plugins/fzf\-tab
+.
+.fi
+.
+.IP "" 0
+.
+.SS "Prezto"
+Clone this repository to your contrib directory and then add \fBfzf\-tab\fR to your module list in \fB\.zpreztorc\fR\.
+.
+.IP "" 4
+.
+.nf
+
+git clone https://github\.com/Aloxaf/fzf\-tab $ZPREZTODIR/contrib/fzf\-tab
+.
+.fi
+.
+.IP "" 0
+Just press \fBTab\fR as usual~
+.
+.P
+Available keybindings:
+.
+.IP "\[ci]" 4
+\fBCtrl+\fR: select multiple results, can be configured by \fBfzf\-bindings\fR tag
+.
+.IP "\[ci]" 4
+\fBF1\fR/\fBF2\fR: switch between groups, can be configured by \fBswitch\-group\fR tag
+.
+.IP "\[ci]" 4
+\fB/\fR: trigger continuous completion (useful when completing a deep path), can be configured by \fBcontinuous\-trigger\fR tag
+.
+.IP "" 0
+.
+.P
+Available commands:
+.
+.IP "\[ci]" 4
+\fBdisable\-fzf\-tab\fR: disable fzf\-tab and fallback to compsys
+.
+.IP "\[ci]" 4
+\fBenable\-fzf\-tab\fR: enable fzf\-tab
+.
+.IP "\[ci]" 4
+\fBtoggle\-fzf\-tab\fR: toggle the state of fzf\-tab\. This is also a zle widget\.
+.
+.IP "" 0
+.
+.SH "Configure"
+A common configuration is:
+.
+.IP "" 4
+.
+.nf
+
+# disable sort when completing `git checkout`
+zstyle \':completion:*:git\-checkout:*\' sort false
+# set descriptions format to enable group support
+zstyle \':completion:*:descriptions\' format \'[%d]\'
+# set list\-colors to enable filename colorizing
+zstyle \':completion:*\' list\-colors ${(s\.:\.)LS_COLORS}
+# preview directory\'s content with exa when completing cd
+zstyle \':fzf\-tab:complete:cd:*\' fzf\-preview \'exa \-1 \-\-color=always $realpath\'
+# switch group using `,` and `\.`
+zstyle \':fzf\-tab:*\' switch\-group \',\' \'\.\'
+.
+.fi
+.
+.IP "" 0
+.
+.P
+For more information, please see Wiki#Configuration \fIhttps://github\.com/Aloxaf/fzf\-tab/wiki/Configuration\fR\.
+.
+.SH "Binary module"
+By default, fzf\-tab uses zsh\-ls\-colors \fIhttps://github\.com/xPMo/zsh\-ls\-colors\fR to parse and apply ZLS_COLORS if you have set the \fBlist\-colors\fR tag\.
+.
+.P
+However, it is a pure zsh script and is slow if you have too many files to colorize\. fzf\-tab is shipped with a binary module to speed up this process\. You can build it with \fBbuild\-fzf\-tab\-module\fR, then it will be enabled automatically\.fzf\-tab doesn\'t do "complete", it just shows you the results of the default completion system\.
+.
+.P
+So it works EVERYWHERE (variables, function names, directory stack, in\-word completion, etc\.)\. And most of your configuration for default completion system is still valid\.Some plugins may also bind "^I" to their custom widget, like fzf/shell/completion\.zsh \fIhttps://github\.com/junegunn/fzf/blob/master/shell/completion\.zsh\fR or ohmyzsh/lib/completion\.zsh \fIhttps://github\.com/ohmyzsh/ohmyzsh/blob/master/lib/completion\.zsh#L61\-L73\fR\.
+.
+.P
+By default, fzf\-tab will call the widget previously bound to "^I" to get the completion list\. So there is no problem in most cases, unless fzf\-tab is initialized before a plugin which doesn\'t handle the previous binding properly\.
+.
+.P
+So if you find your fzf\-tab doesn\'t work properly, \fBplease make sure it is the last plugin to bind "^I"\fR (If you don\'t know what I mean, just put it to the end of your plugin list)\.
+.
+.IP "\[ci]" 4
+https://github\.com/lincheney/fzf\-tab\-completion (fzf tab completion for zsh, bash and GNU readline apps)
+.
+.IP "" 0
+
