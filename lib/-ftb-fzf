@@ -26,8 +26,11 @@ export word=\${(Q)ctxt[word]}
 if (( \$+ctxt[realdir] )); then
   export realpath=\${ctxt[realdir]}\$word
 fi
-$(typeset -p words)
+# get original word
+export word=\$ctxt[word]
 "
+
+# $(typeset -p words)
 local default_binds=tab:down,btab:up,change:top,ctrl-space:toggle,bspace:backward-delete-char/eof,ctrl-h:backward-delete-char/eof
 local fzf_command fzf_flags fzf_preview debug_command tmp switch_group fzf_pad fzf_min_height binds
 local ret=0
