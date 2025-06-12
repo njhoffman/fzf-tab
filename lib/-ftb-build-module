@@ -36,4 +36,3 @@ make -j$nproc
 
 # we only need aloxaf/fzftab.so
 mv ./Src/Modules/fzftab.(so|bundle) $FZF_TAB_HOME/modules/Src/aloxaf/
->>>>>>> 6aced3f35def61c5edf9d790e945e8bb4fe7b305
