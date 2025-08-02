@@ -1,9 +1,14 @@
+#!/usr/bin/env zsh
+
 # temporarily change options
 'builtin' 'local' '-a' '_ftb_opts'
 [[ ! -o 'aliases'         ]] || _ftb_opts+=('aliases')
 [[ ! -o 'sh_glob'         ]] || _ftb_opts+=('sh_glob')
 [[ ! -o 'no_brace_expand' ]] || _ftb_opts+=('no_brace_expand')
 'builtin' 'setopt' 'no_aliases' 'no_sh_glob' 'brace_expand'
+
+# load common functions
+source "${0:A:h}/util.zsh"
 
 # disable aliases
 typeset _ftb_aliases="$(builtin alias -Lm '[^+]*')"
@@ -86,6 +91,8 @@ builtin unalias -m '[^+]*'
       _ftb_compcap+=$dscr$'\2'$__tmp_value$'\0word\0'$word
     done
   fi
+
+  # __log_completions_stats
 
   # tell zsh that the match is successful
   builtin compadd "$@"
@@ -207,10 +214,11 @@ _fzf-tab-apply() {
 
 fzf-tab-debug() {
   (( $+_ftb_debug_cnt )) || typeset -gi _ftb_debug_cnt
-  local tmp=${TMPPREFIX:-/tmp/zsh}-$$-fzf-tab-$(( ++_ftb_debug_cnt )).log
+  local debuglog="${__LOGDIR}-$$-fzf-tab-$(( ++_ftb_debug_cnt )).log"
+
   local -i debug_fd=-1 IN_FZF_TAB=1
   {
-    exec {debug_fd}>&2 2>| $tmp
+    exec {debug_fd}>&2 2>| $debuglog
     local -a debug_indent; debug_indent=( '%'{3..20}'(e. .)' )
     local PROMPT4 PS4="${(j::)debug_indent}+%N:%i> "
     functions -t -- -ftb-complete  _fzf-tab-apply fzf-tab-complete
@@ -222,7 +230,7 @@ fzf-tab-debug() {
     } >&2
     zle fzf-tab-complete
     if (( debug_fd != -1 )); then
-      zle -M "fzf-tab-debug: Trace output left in $tmp"
+      zle -M "fzf-tab-debug: Trace output left in $debuglog"
     fi
   } always {
     functions +t -- -ftb-complete _fzf-tab-apply fzf-tab-complete
@@ -379,8 +387,8 @@ build-fzf-tab-module() {
   }
 }
 
-zmodload zsh/zutil
 zmodload zsh/mapfile
+zmodload zsh/zutil
 zmodload -F zsh/stat b:zstat
 
 0="${${ZERO:-${0:#$ZSH_ARGZERO}}:-${(%):-%N}}"

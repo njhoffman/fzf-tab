@@ -1,11 +1,16 @@
-#!/hint/zsh
+#!/usr/bin/env zsh
+
 # Show results with tmux popup
 # Example usage:
 #   zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup
 #   zstyle ':fzf-tab:*' popup-pad 0 0
-# It can also be used as a standalone tool, like:
-#   ls | ftb-tmux-popup
+#   ls | ftb-tmux-popup (standalone usage)
+
+# load common functions
+source "${0:A:h}/../util.zsh"
+
 emulate -L zsh -o extended_glob
+zmodload zsh/mapfile
 
 # import math functions (only if they're not already defined)
 if (( ! $+functions[zsh_math_func_min] )); then
@@ -17,7 +22,7 @@ fi
 
 # fallback to fzf if it is not running in tmux
 if (( ! $+TMUX_PANE )); then
-  fzf $@
+  ftb-fzf $@
   return
 fi
 
@@ -87,14 +92,21 @@ fi
 popup_width=$(( min(max(comp_length + fzf_tmux_width_factor, popup_min_size[1]), window_width) ))
 popup_x=$(( cursor_x + popup_width > window_width ? window_width - popup_width : cursor_x ))
 
-echo -E "env FZF_DEFAULT_OPTS='' SHELL=$ZSH_NAME $commands[fzf] ${(qq)fzf_opts[@]} < $tmp_dir/completions.$$ > $tmp_dir/result-$$" > $tmp_dir/fzf-$$
+# log window dimensions and properties
+
+echo -E "env FZF_DEFAULT_OPTS='' SHELL=$ZSH_NAME \
+  $commands[fzf] ${(qq)fzf_opts[@]} \
+  < $tmp_dir/completions.$$ > $tmp_dir/result-$$" > $tmp_dir/fzf-$$
 {
+  # __log_options
   tmux popup -x $popup_x -y $popup_y \
        -w $popup_width -h $popup_height \
        -d $PWD -E ". $tmp_dir/fzf-$$" || ret=$?
   echo -E "$(<$tmp_dir/result-$$)"
 } always {
+  # __log_selection_info
   command rm $tmp_dir/*-$$
   (( $+IN_FZF_TAB )) || command rm $tmp_dir/completions.$$
 }
+
 return $ret

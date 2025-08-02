@@ -1,7 +1,8 @@
 #!/hint/zsh
-emulate -L zsh -o extended_glob
 
+emulate -L zsh -o extended_glob
 zmodload zsh/mapfile
+
 
 # receive arguments
 local pid=$1 header_lines=$2 tmp_dir=$3 offset=$@[-1]

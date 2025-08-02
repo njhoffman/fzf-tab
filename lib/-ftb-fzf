@@ -1,4 +1,8 @@
 #!/hint/zsh
+# Show results with fzf picker
+
+# load common functions
+source "${0:A:h}/../util.zsh"
 
 # import math functions
 autoload -Uz zmathfunc
@@ -62,17 +66,22 @@ local -i lines=$(( $#_ftb_compcap + fzf_pad + header_lines ))
 local reload_command="$commands[zsh] -f $FZF_TAB_HOME/lib/ftb-switch-group $$ $header_lines $tmp_dir"
 
 # detect if we will use tmux popup
+
 local use_tmux_popup=0
 if [[ $fzf_command == "ftb-tmux-popup" ]]; then
   use_tmux_popup=1
-fi
-
-if (( ! use_tmux_popup )); then
+else
+  fzf_command="ftb-fzf"
   # fzf will cause the current line to refresh, so move the cursor down.
   echoti cud1 >/dev/tty
   # reset cursor before call fzf
   echoti cnorm >/dev/tty 2>/dev/null
 fi
+
+
+[[ -n "$FZF_TAB_HOME" ]] && fzf_command="${FZF_TAB_HOME}/lib/${fzf_command}"
+
+# __log window properties and dimensions
 
 cat > $tmp_dir/completions.$$
 
@@ -91,7 +100,8 @@ if [[ "$use_fzf_default_opts" == "yes" ]]; then
   fzf_default_opts=$FZF_DEFAULT_OPTS
 fi
 
-FZF_DEFAULT_OPTS=$fzf_default_opts SHELL=$ZSH_NAME $fzf_command \
+FZF_DEFAULT_OPTS=$fzf_default_opts SHELL=$ZSH_NAME \
+  $fzf_command \
   --ansi \
   --bind=$binds \
   --bind="${switch_group[1]}:reload($reload_command -1),${switch_group[2]}:reload($reload_command 1)" \
@@ -110,10 +120,16 @@ FZF_DEFAULT_OPTS=$fzf_default_opts SHELL=$ZSH_NAME $fzf_command \
   ${fzf_preview:+--preview=${ftb_preview_init/{f}/'{f}'}$fzf_preview} \
   $fzf_flags < $tmp_dir/completions.$$ || ret=$?
 
+# log fzf flags and options
+# __util_logoptions "tmux" "${fzf_flags}" "${FZF_DEFAULT_OPTS}"
+
 if (( ! use_tmux_popup )); then
   echoti civis >/dev/tty 2>/dev/null
   echoti cuu1 >/dev/tty
 fi
 
+# __log_selection_info
+
 command rm $tmp_dir/*.$$ 2>/dev/null
+
 return $ret

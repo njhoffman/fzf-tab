@@ -1,5 +1,6 @@
 #!/hint/zsh
 
+
 typeset -ga _ftb_headers=()
 local i tmp group_colors
 local -i mlen=0 len=0

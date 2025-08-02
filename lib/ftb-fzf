@@ -1,0 +1,5 @@
+#!/usr/bin/env zsh
+
+# show results with default fzf program
+$commands[fzf] $@
+
