@@ -7,7 +7,7 @@
 #   ls | ftb-tmux-popup (standalone usage)
 
 # load common functions
-source "${0:A:h}/../util.zsh"
+source "$FZF_TAB_HOME/util.zsh"
 
 emulate -L zsh -o extended_glob
 zmodload zsh/mapfile

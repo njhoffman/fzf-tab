@@ -2,7 +2,7 @@
 # Show results with fzf picker
 
 # load common functions
-source "${0:A:h}/../util.zsh"
+source "$FZF_TAB_HOME/util.zsh"
 
 # import math functions
 autoload -Uz zmathfunc
@@ -100,6 +100,7 @@ if [[ "$use_fzf_default_opts" == "yes" ]]; then
   fzf_default_opts=$FZF_DEFAULT_OPTS
 fi
 
+#   --width=${FZF_TMUX_WIDTH:-80} \
 FZF_DEFAULT_OPTS=$fzf_default_opts SHELL=$ZSH_NAME \
   $fzf_command \
   --ansi \
@@ -110,7 +111,6 @@ FZF_DEFAULT_OPTS=$fzf_default_opts SHELL=$ZSH_NAME \
   --expect=$continuous_trigger,$print_query,$accept_line \
   --header-lines=$header_lines \
   --height=${FZF_TMUX_HEIGHT:=$(( min(max(lines, fzf_min_height), LINES / 3 * 2)  ))} \
-  --width=${FZF_TMUX_WIDTH:-80} \
   --layout=reverse \
   --multi \
   --nth=2,3 \
