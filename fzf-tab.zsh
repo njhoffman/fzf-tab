@@ -270,12 +270,16 @@ fzf-tab-complete() {
   return $ret
 }
 
+# TODO: if TMUX available force popup 
+fzf-tab-complete-popup() { }
+
 # this function does nothing, it is used to be wrapped by other plugins like f-sy-h.
 # this make it possible to call the wrapper function without causing any other side effects.
 fzf-tab-dummy() { }
 
 zle -N fzf-tab-debug
 zle -N fzf-tab-complete
+zle -N fzf-tab-complete-popup
 zle -N fzf-tab-dummy
 # this is registered as a completion widget
 # so that we can have a clean completion list to only insert the results user selected
