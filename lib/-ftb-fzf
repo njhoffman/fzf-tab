@@ -100,6 +100,7 @@ if [[ "$use_fzf_default_opts" == "yes" ]]; then
   fzf_default_opts=$FZF_DEFAULT_OPTS
 fi
 
+#   --nth=2,3 \  https://github.com/Aloxaf/fzf-tab/pull/528
 #   --width=${FZF_TMUX_WIDTH:-80} \
 FZF_DEFAULT_OPTS=$fzf_default_opts SHELL=$ZSH_NAME ${(z)fzf_command} \
   --ansi \
@@ -112,7 +113,7 @@ FZF_DEFAULT_OPTS=$fzf_default_opts SHELL=$ZSH_NAME ${(z)fzf_command} \
   --height=${FZF_TMUX_HEIGHT:=$(( min(max(lines, fzf_min_height), LINES / 3 * 2)  ))} \
   --layout=reverse \
   --multi \
-  --nth=2,3 \
+  --nth=2 \
   --print-query \
   --query=$_ftb_query \
   --tiebreak=begin \
