@@ -2,6 +2,7 @@
 # Show results with fzf picker
 
 # load common functions
+FZF_TAB_HOME="${FZF_TAB_HOME:-${0:A:h}/..}"
 source "$FZF_TAB_HOME/util.zsh"
 
 # import math functions
@@ -83,7 +84,7 @@ fi
 
 # __log window properties and dimensions
 
-cat > $tmp_dir/completions.$$
+command cat > $tmp_dir/completions.$$
 
 local dd='gdd'
 if (( ${+commands[$dd]} == 0 )) ; then
