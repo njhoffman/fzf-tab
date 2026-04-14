@@ -86,6 +86,8 @@ fi
 
 command cat > $tmp_dir/completions.$$
 
+# https://github.com/Aloxaf/fzf-tab/issues/549
+# sudo apt install coreutils-from-gnu coreutils-from-uutils- --allow-remove-essential
 local dd='gdd'
 if (( ${+commands[$dd]} == 0 )) ; then
   dd='dd'
