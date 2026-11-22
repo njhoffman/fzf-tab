@@ -4,27 +4,6 @@ Open work on the `njhoffman/fzf-tab` fork. Reviewed: 2026-11-22
 
 Categories: bug feature refactor docs test chore perf
 
-## Loading
-
-- [x] **zinit loads the local `upstream` branch, not `master`.** (p1) [chore] The checkout was
-  switched to `upstream` (upstream's code, 24105b1) on 2026-10-22, so none of the fork's features
-  (popup options, `use-fzf-default-opts`, the space continuous trigger) run in new shells, and
-  `~/.shell`'s zstyles for them do nothing. `master` now has upstream's code merged in. Switch the
-  checkout to `master` (`git switch master`), then open a few shells and try completions (paths,
-  git, a tmux popup) before relying on it. With `master` loaded, set
-  `zstyle ':fzf-tab:*' active-group-style bold,italic` in `~/.shell` to keep the old header look.
-  Done 2026-11-22: the checkout is on `master` (1.3.0+nj.2), `~/.shell` 0.125.1 sets
-  `active-group-style bold,italic` and the two-key `continuous-trigger`; paths, git and systemctl
-  completions checked in fresh shells under tmux.
-
-## Performance
-
-- [ ] **util.zsh forks `date` at every shell start.** (p2) [perf] `__START_TIME=$(date +%s)` runs
-  when fzf-tab.plugin.zsh sources util.zsh; use `$EPOCHSECONDS` (zsh/datetime) or drop it. The
-  `date` calls inside `__util_log` fork per log line too.
-- [ ] **ftb-tmux-popup sources util.zsh on every popup.** (p3) [perf] Only for logging helpers
-  that are commented out at their call sites.
-
 ## Cleanup
 
 - [ ] **Debug log path.** (p3) [bug] `__LOGDIR='/tmp/fzf-tab/'` makes the trace file
@@ -45,3 +24,29 @@ Categories: bug feature refactor docs test chore perf
 - [ ] **No tests for the fork's popup options.** (p3) [test] `test/fzftab.ztst` covers
   completion, not `lib/ftb-tmux-popup` (it needs tmux); a test with a stub `tmux` that records the
   `display-popup` arguments would cover the size and border options.
+
+## Completed
+
+### Loading (completed 2026-11-22)
+
+- [x] **zinit loads the local `upstream` branch, not `master`.** (p1) [chore] The checkout was
+  switched to `upstream` (upstream's code, 24105b1) on 2026-10-22, so none of the fork's features
+  (popup options, `use-fzf-default-opts`, the space continuous trigger) run in new shells, and
+  `~/.shell`'s zstyles for them do nothing. `master` now has upstream's code merged in. Switch the
+  checkout to `master` (`git switch master`), then open a few shells and try completions (paths,
+  git, a tmux popup) before relying on it. With `master` loaded, set
+  `zstyle ':fzf-tab:*' active-group-style bold,italic` in `~/.shell` to keep the old header look.
+  Done 2026-11-22: the checkout is on `master` (1.3.0+nj.2), `~/.shell` 0.125.1 sets
+  `active-group-style bold,italic` and the two-key `continuous-trigger`; paths, git and systemctl
+  completions checked in fresh shells under tmux.
+
+### Performance (completed 2026-11-22)
+
+- [x] **util.zsh forks `date` at every shell start.** (p2) [perf] `__START_TIME=$(date +%s)` runs
+  when fzf-tab.plugin.zsh sources util.zsh; use `$EPOCHSECONDS` (zsh/datetime) or drop it. The
+  `date` calls inside `__util_log` fork per log line too.
+  Done 2026-11-22 (1.3.0+nj.3): `$EPOCHSECONDS` and `strftime`; it was also re-sourced by
+  `lib/-ftb-fzf` at every completion, which no longer happens. Test: "util.zsh ... runs no date".
+- [x] **ftb-tmux-popup sources util.zsh on every popup.** (p3) [perf] Only for logging helpers
+  that are commented out at their call sites.
+  Done 2026-11-22 (1.3.0+nj.3): no longer sourced there; its logging calls stay commented out.

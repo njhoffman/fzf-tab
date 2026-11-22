@@ -6,9 +6,9 @@
 #   zstyle ':fzf-tab:*' popup-pad 0 0
 #   ls | ftb-tmux-popup (standalone usage)
 
-# load common functions
+# util.zsh's logging helpers are not sourced here: this runs for every popup,
+# and their call sites below are commented out (source it to use them)
 FZF_TAB_HOME="${FZF_TAB_HOME:-${0:A:h}/..}"
-source "$FZF_TAB_HOME/util.zsh"
 
 emulate -L zsh -o extended_glob
 zmodload zsh/mapfile

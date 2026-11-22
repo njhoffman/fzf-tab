@@ -1,9 +1,8 @@
 #!/hint/zsh
 # Show results with fzf picker
 
-# load common functions
+# util.zsh is loaded with the plugin (fzf-tab.zsh); this runs in the same shell
 FZF_TAB_HOME="${FZF_TAB_HOME:-${0:A:h}/..}"
-source "$FZF_TAB_HOME/util.zsh"
 
 # import math functions
 autoload -Uz zmathfunc

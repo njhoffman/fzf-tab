@@ -1,12 +1,17 @@
 #!/usr/bin/env zsh
 
+# Sourced once, by fzf-tab.zsh when the plugin loads; nothing here may fork
+# (every new shell sources it). Times come from zsh/datetime, not date(1).
+zmodload -F zsh/datetime p:EPOCHSECONDS b:strftime
+
 __LOGDIR='/tmp/fzf-tab/'
-__START_TIME=$(date +%s)
+typeset -g __START_TIME=${__START_TIME:-$EPOCHSECONDS}
 
 __util_log() {
   local filelog="$__LOGDIR/info.log"
   local message="$1"
-  local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+  local timestamp
+  strftime -s timestamp '%Y-%m-%d %H:%M:%S' $EPOCHSECONDS
   local payload="$2"
 
   printf "%10s %s""$timestamp" "$message"

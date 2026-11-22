@@ -7,6 +7,16 @@ fork counter (`1.3.0+nj.N`, see CLAUDE.md).
 
 ## [Unreleased]
 
+## [1.3.0+nj.3] - 2026-11-22
+
+### Fixed
+
+- `util.zsh` no longer forks `date`: it ran `$(date +%s)` whenever it was sourced, which was at
+  every shell start and, since `lib/-ftb-fzf` sourced it again, at every completion. Times come
+  from `$EPOCHSECONDS` and the `strftime` builtin. `lib/-ftb-fzf` no longer re-sources it (the
+  plugin loads it once in the same shell), and `lib/ftb-tmux-popup` no longer sources it on every
+  popup (its logging calls are commented out).
+
 ## [1.3.0+nj.2] - 2026-11-22
 
 ### Added
