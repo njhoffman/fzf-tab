@@ -7,6 +7,15 @@ fork counter (`1.3.0+nj.N`, see CLAUDE.md).
 
 ## [Unreleased]
 
+## [1.3.0+nj.13] - 2026-11-22
+
+### Fixed
+
+- Completions with an `fzf-preview` work again: since 1.3.0+nj.9 the preview command was also
+  passed to fzf as an argument of its own (`${fzf_preview:---no-preview}` is the preview when
+  there is one), and fzf stopped with `unknown option: ...`. `--no-preview` is added only when
+  there is no preview; the preview test checks fzf's arguments for it.
+
 ## [1.3.0+nj.12] - 2026-11-22
 
 ### Fixed

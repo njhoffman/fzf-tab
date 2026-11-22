@@ -93,6 +93,10 @@ command cat > $tmp_dir/completions.$$
 # (completion queries would fill fzf's search history) and --preview, unless
 # fzf-preview gives one ({} is fzf-tab's NUL-separated row, not a path).
 local fzf_default_opts='' fzf_default_opts_file=''
+# --no-preview only without a preview of fzf-tab's own (not ${fzf_preview:-...},
+# which is the preview command itself when there is one)
+local -a no_preview=()
+[[ -n $fzf_preview ]] || no_preview=(--no-preview)
 if [[ "$use_fzf_default_opts" == "yes" ]]; then
   fzf_default_opts=$FZF_DEFAULT_OPTS
   fzf_default_opts_file=${FZF_DEFAULT_OPTS_FILE-}
@@ -117,7 +121,7 @@ FZF_DEFAULT_OPTS=$fzf_default_opts FZF_DEFAULT_OPTS_FILE=$fzf_default_opts_file 
   --tiebreak=begin \
   --no-history \
   ${fzf_preview:+--preview=${ftb_preview_init}$fzf_preview} \
-  ${fzf_preview:---no-preview} \
+  $no_preview \
   $fzf_flags < $tmp_dir/completions.$$ || ret=$?
 
 # log fzf flags and options

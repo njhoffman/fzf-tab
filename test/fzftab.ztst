@@ -420,6 +420,10 @@
   comptesteval "zstyle ':fzf-tab:*' debug-command $ZTST_srcdir/select -n 1 -h '\$#_ftb_headers' -q '\"\$_ftb_query\"'"
   local -a fzfargs=(${(Q)${(z)"$(<popup.log)"}})
   local preview=${${(M)fzfargs:#--preview=*}[1]#--preview=}
+  # the preview command appears once, inside --preview=, never as an argument of its own
+  local pcmd='print -r -- "word=$word realpath=$realpath"'
+  (( ${fzfargs[(Ie)$pcmd]} )) && print preview-passed-as-argument
+  (( ${fzfargs[(Ie)--no-preview]} )) && print no-preview-despite-fzf-preview
   # a row is colors, then the word and its suffix as NUL-separated fields
   grep -a 'dir1' popup.log.rows | head -1 > row
   preview=${preview//${TMPPREFIX:-\/tmp\/zsh}-fzf-tab-$USER/$PWD/popup.log.tmp}
