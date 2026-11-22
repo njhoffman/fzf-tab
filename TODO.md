@@ -4,6 +4,92 @@ Open work on the `njhoffman/fzf-tab` fork. Reviewed: 2026-11-22
 
 Categories: bug feature refactor docs test chore perf
 
+Scanned 2026-11-22: upstream's 88 open issues and 27 open PRs (the fork has issues off and no PRs).
+"Merges cleanly" means `git merge-tree` of the PR against master had no conflicts that day.
+
+## Upstream fixes for this setup
+
+Bugs with an open upstream PR that the options in `~/.shell` hit (`COMPLETE_IN_WORD`, the
+case-insensitive and subsequence `matcher-list`, `_match`/`_approximate`, carapace adapters).
+Take each as a cherry-pick with its test, run the suite, note the PR in CHANGELOG.md.
+
+- [ ] **Tab inside a word does nothing with `complete_in_word` (upstream #603).** (p2) [bug]
+  `ls ab|x` with two matches never opens fzf, and Tab again repeats the no-op. `~/.shell` sets
+  `COMPLETE_IN_WORD`. Conflicts with master in `fzf-tab.zsh`.
+- [ ] **Case-insensitive matches insert one case-twin (upstream #589, PR #600).** (p2) [bug] With
+  `m:{a-z}={A-Z}` (in `~/.shell`'s `matcher-list`), `Foo` and `foo` both matching makes zsh report
+  one as unambiguous and fzf-tab inserts it without the picker. Conflicts in `fzf-tab.zsh`.
+- [ ] **Subsequence matchers bias toward one candidate (upstream #560, PR #576).** (p2) [bug]
+  `~/.shell`'s last `matcher-list` entries (`r:[[:ascii:]]||[[:ascii:]]=**`) produce a
+  `compstate[unambiguous]` that is not a substring of every candidate; fzf-tab inserts it instead
+  of showing the picker. Conflicts in `fzf-tab.zsh`; take it with #597 below, same code.
+- [ ] **The unambiguous fast path can rewrite the word destructively (upstream PR #597).** (p2)
+  [bug] Two guards on the fast path in `-ftb-complete` (unambiguous shorter than the word, or not
+  a prefix of it). Same block as #576 and #600: merge the three together.
+- [ ] **Carapace's pre-quoted words get a literal double backslash (upstream #503, PR #584).**
+  (p2) [bug] `path\\ file` lands on the command line for completions that come through carapace
+  (`~/.shell`'s zsh-complete caches carapace gap adapters). Merges cleanly. Related: #601, a
+  carapace file completion inside a directory starts with query `dir/` and shows 0/N (no PR).
+- [ ] **fzf reads `FZF_DEFAULT_OPTS_FILE` inside fzf-tab (upstream PR #505).** (p2) [bug] fzf-tab
+  clears `FZF_DEFAULT_OPTS` but fzf still reads the file, and `~/.config/fzf/fzfrc` sets
+  `--preview="fzf-preview {}"` (fzf-tab's `{}` is its NUL-separated line, not a path) and
+  `--history=...` (completion queries end up in fzf's search history). Ignore the file unless
+  `use-fzf-default-opts` is yes, as #505 does, and decide whether `~/.shell` should keep
+  `use-fzf-default-opts yes` or pass only the bindings it wants through `fzf-flags`. Conflicts in
+  `lib/-ftb-fzf` and `lib/ftb-tmux-popup`.
+
+## Upstream fixes, other
+
+- [ ] **`autoload ... --` registers a function named `--` (upstream #593, PR #598).** (p3) [bug]
+  `fzf-tab.zsh:440`. Not visible in this shell (no `--` function after loading), but the line is
+  wrong as written. Merges cleanly.
+- [ ] **`compadd -x` inserts the message as a match (upstream PR #592).** (p3) [bug] `zparseopts`
+  keeps `-x` in `$_mesg`, so `builtin compadd -x $_mesg` passes the option twice. Conflicts in
+  `lib/ftb-tmux-popup`.
+- [ ] **Messages from `_message` and `compadd -x` disappear (upstream #604).** (p3) [bug] When the
+  widget returns 0 without candidates, zsh's message is wiped. No PR yet.
+- [ ] **Group switching with identical group colors (upstream #581, PR #585).** (p3) [bug] The
+  switch filters by color, so two groups with the same color switch together. Conflicts in
+  `test/fzftab.ztst` only.
+- [ ] **`$realpath` empty in execute bindings (upstream #575, PR #577).** (p3) [bug] Bindings like
+  `ctrl-e:become(nvim $realpath)` get nothing. Merges cleanly.
+- [ ] **External `sort -u` only with GNU sort (upstream #602, PR #595).** (p3) [bug] BSD sort
+  drops CJK-only differences; harmless on Linux, but the fix is small. Merges cleanly.
+- [ ] **`builtin cd` in the module build (upstream PR #594).** (p3) [bug] A `cd` function
+  (zoxide) breaks `build-fzf-tab-module`. Merges cleanly.
+- [ ] **Nested popup with `--tmux`/`--popup` in fzf's options (upstream #587, PR #588).** (p3)
+  [bug] Not in `fzfrc` today; matters once the popup is used with `use-fzf-default-opts`.
+  Conflicts in `.gitignore` and `lib/ftb-tmux-popup`.
+- [ ] **Extra space before the completion with a right prompt (upstream #535).** (p3) [bug] Seen
+  with starship's left and right prompts; check with p10k's right prompt here before anything else.
+- [ ] **Continuous trigger on `pass` entries (upstream #367).** (p3) [test] `pass` paths are not
+  real directories (no realdir), so `/` is query input and space accepts; confirm that is what
+  `pass <Tab>` should do now that space continues.
+
+## Upstream overlap
+
+- [ ] **Upstream PRs duplicate the fork's popup features.** (p3) [chore] #543 (`popup-max-height`,
+  `popup-max-width`: the fork's names), #523 (`popup-smart-tab-bindings`: same name) and #542 (the
+  `--style` height adjustment the fork has) are open upstream by other authors. If they merge,
+  take upstream's versions in the next sync and drop the fork's copies. #582 adds `reverse` to
+  `active-group-style` next to the fork's `italic`/`bold,italic`: align the token lists.
+- [ ] **Offer the fork's own changes upstream.** (p3) [chore] The multi-key `continuous-trigger`
+  (space for the next argument) and the `italic` header styles have no upstream equivalent; small
+  PRs would shrink the fork's diff. #304 (continuous completion without auto-entering single-child
+  directories) is the request closest to the space trigger.
+
+## CI and build
+
+- [ ] **CI has never run on the fork.** (p2) [test] Actions is enabled for `njhoffman/fzf-tab`,
+  but no workflow run exists: GitHub holds workflows on forks until they are enabled in the
+  repository's Actions tab (a one-time click; needs the web UI). The workflows run the suite on
+  Ubuntu and Arch, with and without the binary module.
+- [ ] **Build the binary module on the hosts.** (p3) [perf] `FZF_TAB_MODULE_VERSION` is unset
+  here, so list-colors go through the pure-zsh zsh-ls-colors. `build-fzf-tab-module` builds
+  0.2.2 from the fork's (reformatted) source and the suite passes with it (checked 2026-11-22 in a
+  scratch worktree). Have zinit build it (`atclone`/`atpull'build-fzf-tab-module'` on the plugin
+  in `~/.shell`'s `widgets.zsh`), so new hosts get it too; it clones zsh's source (network).
+
 ## Cleanup
 
 - [ ] **A custom `fzf-command` is ignored.** (p3) [bug] `lib/-ftb-fzf` replaces any
