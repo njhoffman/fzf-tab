@@ -141,6 +141,45 @@ builtin unalias -m '[^+]*'
   zstyle $1 ":fzf-tab:$_ftb_curcontext" ${@:2}
 }
 
+# -ftb-unambiguous-safe: whether zsh's compstate[unambiguous] can be inserted
+# without showing the picker. Zsh computes it over matcher alignments, so with
+# the matchers people use it is not always a string any candidate starts with.
+# Upstream's PRs #597, #576 and #600 each guard one case in the fast path; they
+# are combined here (they patch the same lines):
+# - #597: the typed word is already longer than the common string (inserting
+#   it would delete typed characters, `dir/` -> `dir`), or the string starts
+#   no candidate's insertion form (`forgejo-actions` -> `fforgejo-actions`;
+#   also carapace's doubly quoted words, `my\\ ` for `my\ file.json`);
+# - #576: subsequence matchers produce a string that is not in every
+#   candidate (its last path segment is checked);
+# - #600: case-insensitive matchers with candidates that differ only by case
+#   (`xaaa`, `Xaaa`) would insert one of them.
+-ftb-unambiguous-safe() {
+  emulate -L zsh -o extended_glob
+  local unamb=$compstate[unambiguous] typed="$compstate[quote]$IPREFIX$PREFIX"
+  local seg=${compstate[unambiguous]##*/} entry word full bs=$'\2'
+  local -i i starts=0
+  local -a kv
+  [[ $typed != "$unamb"* ]] || return 1
+  for entry in "${_ftb_compcap[@]}"; do
+    # entry: dscr \2 < \0 > \0 key \0 value ... word \0 WORD: the keys are
+    # at the odd indices from 3, the word is the last pair
+    kv=("${(@0)${entry#*$bs}}")
+    [[ ${kv[-2]} == word ]] || continue
+    word=${kv[-1]}
+    [[ -z $seg || $word == *"$seg"* ]] || return 1
+    [[ ${(L)word} == ${(L)unamb} && $word != "$unamb" ]] && return 1
+    if (( ! starts )); then
+      full=$compstate[quote]
+      for (( i = 3; i < $#kv - 1; i += 2 )); do
+        [[ ${kv[i]} == (IPREFIX|hpre) ]] && full+=${kv[i+1]}
+      done
+      [[ $full$word == "$unamb"* ]] && starts=1
+    fi
+  done
+  (( starts ))
+}
+
 -ftb-complete() {
   local -Ua _ftb_groups
   local choice choices _ftb_curcontext print_query accept_line bs=$'\2' nul=$'\0'
@@ -197,7 +236,8 @@ builtin unalias -m '[^+]*'
         && [[ $compstate[insert] == *"unambiguous" ]] \
         && [[ -n $compstate[unambiguous] ]] \
         && [[ "$compstate[unambiguous]" != "$compstate[quote]$IPREFIX$PREFIX$compstate[quote]" ]] \
-        && [[ $compstate[list] != *"force"* ]]; then
+        && [[ $compstate[list] != *"force"* ]] \
+        && -ftb-unambiguous-safe; then
         compstate[list]=
         compstate[insert]=unambiguous
         _ftb_finish=1

@@ -218,6 +218,28 @@
 0:cancel completion
 >line: {: d}{}
 
+  comptesteval "zstyle ':completion:*' menu no; zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|=*' 'l:|=* r:|=*'"
+  comptesteval "mkdir -p somedir/project_alpha_1234_final somedir/project_al_pha_benchmark_1234"
+  comptest $': somedir/_1234\t'
+  comptesteval "rm -r somedir; zstyle ':completion:*' menu true; zstyle -d ':completion:*' matcher-list"
+0:matcher-list subsequence unambiguous falls through (the picker opens; this debug-command picks nothing)
+>line: {: somedir/_1234}{}
+>QUERY:{}
+>DESCRIPTION:{file}
+>C1:{project_al_pha_benchmark_1234/}
+>C1:{project_alpha_1234_final/}
+
+  comptesteval "zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'"
+  comptesteval 'touch xaaa Xaaa'
+  comptest $': x\t'
+  comptesteval 'rm xaaa Xaaa; zstyle -d ":completion:*" matcher-list'
+0:case-insensitive twins open the picker (this debug-command picks nothing)
+>line: {: x}{}
+>QUERY:{}
+>DESCRIPTION:{file}
+>C1:{Xaaa}
+>C1:{xaaa}
+
   comptesteval "zstyle ':fzf-tab:*' debug-command $ZTST_srcdir/select -n QUERY -h '\$#headers' -q '\"dragon\"'"
   comptest $': ./d\t'
   comptesteval "zstyle ':fzf-tab:*' debug-command $ZTST_srcdir/select -n 1 -h '\$#headers' -q '\"\$query\"'"
@@ -362,6 +384,62 @@
 >QUERY:{}
 >C0:{alpha one}
 >C0:{beta two}
+
+  comptesteval "zstyle ':fzf-tab:*' debug-command $ZTST_srcdir/select -n 1 -h '\$#headers' -q '\"\$query\"'"
+0:upstream's debug-command for the next cases (from upstream's test file)
+
+  comptesteval 'mkdir -p dir3/a dir3/b; touch dir3/x dir3/y; _tst3() { _files; local -a c d; c=(dir3/a/mod.nix dir3/b/mod.nix); d=("relpath      dir3/a/mod.nix" "relpath      dir3/b/mod.nix"); compadd -J ext-group -x "external" -d d -a c }; compdef _tst3 tst3'
+  comptesteval "zstyle ':completion:*' menu select; zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=*' 'l:|=* r:|=*'"
+  comptest $'tst3 dir3/\t'
+0:external bare-word candidates must not make the unambiguous fast path truncate the typed word
+>line: {tst3 dir3/}{}
+>QUERY:{}
+>DESCRIPTION:{file}
+>C1:{a/}
+>C1:{b/}
+>C1:{x}
+>C1:{y}
+>C0:{relpath      dir3/a/mod.nix}
+>C0:{relpath      dir3/b/mod.nix}
+
+  comptest $'tst3 "dir3/\t'
+0:quoted variant: external bare-word candidates must not delete the path after the quote
+>line: {tst3 "dir3/}{}
+>QUERY:{}
+>DESCRIPTION:{file}
+>C1:{a/}
+>C1:{b/}
+>C1:{x}
+>C1:{y}
+>C0:{relpath      dir3/a/mod.nix}
+>C0:{relpath      dir3/b/mod.nix}
+
+  comptesteval "zstyle -d ':completion:*' matcher-list menu group-name; zstyle -d ':completion:*:descriptions' format"
+  comptesteval 'rm -rf dir3; compdef -d tst3'
+0:cleanup dir3 fixture and zstyles
+
+  comptesteval '_tst4() { local -a c; c=(git.lambda.lc/lc-studio/forgejo-actions codeberg.org/nix/forgejo-actions-runner); compadd -M "m:{a-zA-Z}={A-Za-z} l:|=* r:|=*" -a c }; compdef _tst4 tst4'
+  comptesteval "zstyle ':completion:*' menu select"
+  comptest $'tst4 forgejo-actions\t'
+0:substring matcher with misaligned candidates must not fabricate an unambiguous string
+>line: {tst4 codeberg.org/nix/forgejo-actions-runner }{}
+>QUERY:{}
+>C0:{codeberg.org/nix/forgejo-actions-runner}
+>C0:{git.lambda.lc/lc-studio/forgejo-actions}
+
+  comptesteval "zstyle -d ':completion:*' menu; compdef -d tst4"
+0:cleanup substring matcher fixture and zstyles
+
+  comptesteval "zstyle ':fzf-tab:*' debug-command $ZTST_srcdir/select -n 1 -h '\$#_ftb_headers' -q '\"\$_ftb_query\"'"
+0:back to this file's debug-command
+
+  comptesteval $'_tst() { local -a d=(\'my one\' \'my two\'); compadd -Q -d d -- \'my\\\\ one\' \'my\\\\ two\' }'
+  comptest $'tst m\t'
+0:carapace's doubly quoted words: the common prefix (my\\ ) goes through the picker
+>line: {tst my\ one }{}
+>QUERY:{my }
+>C0:{my one}
+>C0:{my two}
 
 %clean
 

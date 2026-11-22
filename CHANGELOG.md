@@ -7,6 +7,23 @@ fork counter (`1.3.0+nj.N`, see CLAUDE.md).
 
 ## [Unreleased]
 
+## [1.3.0+nj.7] - 2026-11-22
+
+### Fixed
+
+- Tab no longer inserts a common string that no candidate has. fzf-tab's unambiguous fast path
+  took zsh's `compstate[unambiguous]` as it came, but with matchers it can be a string no
+  candidate starts with or contains; it now opens the picker in those cases instead:
+  - the typed word is already longer than the common string (`dir/` became `dir`), or the string
+    starts no candidate (substring matchers fabricated `fforgejo-actions`; carapace's doubly
+    quoted words gave `my\\ ` for `my\ file.json`) (upstream PR #597);
+  - subsequence matchers produced a string not found in every candidate (upstream #560, PR #576);
+  - case-insensitive matchers with candidates that differ only by case (`xaaa`, `Xaaa`) inserted
+    one of them (upstream #589, PR #600).
+
+  The three upstream PRs patch the same lines; their checks are combined in
+  `-ftb-unambiguous-safe`, with their tests.
+
 ## [1.3.0+nj.6] - 2026-11-22
 
 ### Fixed
