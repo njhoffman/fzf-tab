@@ -7,6 +7,16 @@ fork counter (`1.3.0+nj.N`, see CLAUDE.md).
 
 ## [Unreleased]
 
+## [1.3.0+nj.8] - 2026-11-22
+
+### Fixed
+
+- With `complete_in_word`, Tab inside a word with several matches (`ls ab|x`) opens the picker:
+  the fast path compared zsh's common string with the part of the word before the cursor only,
+  so it took the whole word for something new to insert, did nothing, and did it again on the
+  next Tab (upstream #603). The comparison includes the part after the cursor now; 1.3.0+nj.7's
+  check already sent this case to the picker, and the test covers both.
+
 ## [1.3.0+nj.7] - 2026-11-22
 
 ### Fixed

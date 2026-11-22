@@ -441,6 +441,14 @@
 >C0:{my one}
 >C0:{my two}
 
+  comptesteval '_tst() { compadd abc1x abc2x }'
+  comptest $'tst abcx\C-b\t'
+0:unambiguous prefix with suffix after cursor (complete_in_word, upstream PR #603)
+>line: {tst abc1x }{}
+>QUERY:{abc}
+>C0:{abc1x}
+>C0:{abc2x}
+
 %clean
 
   zmodload -ui zsh/zpty

@@ -13,9 +13,10 @@ Bugs with an open upstream PR that the options in `~/.shell` hit (`COMPLETE_IN_W
 case-insensitive and subsequence `matcher-list`, `_match`/`_approximate`, carapace adapters).
 Take each as a cherry-pick with its test, run the suite, note the PR in CHANGELOG.md.
 
-- [ ] **Tab inside a word does nothing with `complete_in_word` (upstream #603).** (p2) [bug]
+- [x] **Tab inside a word does nothing with `complete_in_word` (upstream #603).** (p2) [bug]
   `ls ab|x` with two matches never opens fzf, and Tab again repeats the no-op. `~/.shell` sets
   `COMPLETE_IN_WORD`. Conflicts with master in `fzf-tab.zsh`.
+  Done 2026-11-22 (1.3.0+nj.8): #603's comparison and its test.
 - [x] **Case-insensitive matches insert one case-twin (upstream #589, PR #600).** (p2) [bug] With
   `m:{a-z}={A-Z}` (in `~/.shell`'s `matcher-list`), `Foo` and `foo` both matching makes zsh report
   one as unambiguous and fzf-tab inserts it without the picker. Conflicts in `fzf-tab.zsh`.
