@@ -354,6 +354,15 @@
 >line: {tst }{}
 >popup -x 5 -y 17 -b double -S fg=black
 
+
+  comptesteval $'_tst() { local -a d=(\'alpha one\' \'beta two\'); compadd -Q -d d -- \'alpha\\\\ one\' \'beta\\\\ two\' }'
+  comptest $'tst \t'
+0:pre-quoted -Q words with a doubled backslash (carapace) are inserted with one
+>line: {tst alpha\ one }{}
+>QUERY:{}
+>C0:{alpha one}
+>C0:{beta two}
+
 %clean
 
   zmodload -ui zsh/zpty

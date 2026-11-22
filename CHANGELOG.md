@@ -7,6 +7,14 @@ fork counter (`1.3.0+nj.N`, see CLAUDE.md).
 
 ## [Unreleased]
 
+## [1.3.0+nj.5] - 2026-11-22
+
+### Fixed
+
+- A file picked from a carapace completion is inserted with one backslash before a space
+  (`my\ file.json`), not two: carapace hands `compadd -Q` words quoted twice, and fzf-tab put
+  them on the line as they were. Upstream PR #584, with a test.
+
 ## [1.3.0+nj.4] - 2026-11-22
 
 ### Fixed

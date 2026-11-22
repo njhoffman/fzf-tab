@@ -26,10 +26,20 @@ Take each as a cherry-pick with its test, run the suite, note the PR in CHANGELO
 - [ ] **The unambiguous fast path can rewrite the word destructively (upstream PR #597).** (p2)
   [bug] Two guards on the fast path in `-ftb-complete` (unambiguous shorter than the word, or not
   a prefix of it). Same block as #576 and #600: merge the three together.
-- [ ] **Carapace's pre-quoted words get a literal double backslash (upstream #503, PR #584).**
+- [x] **Carapace's pre-quoted words get a literal double backslash (upstream #503, PR #584).**
   (p2) [bug] `path\\ file` lands on the command line for completions that come through carapace
   (`~/.shell`'s zsh-complete caches carapace gap adapters). Merges cleanly. Related: #601, a
   carapace file completion inside a directory starts with query `dir/` and shows 0/N (no PR).
+  Done 2026-11-22 (1.3.0+nj.5): #584 cherry-picked, plus a test (`-Q` words with a doubled
+  backslash). `~/.shell`'s carapace adapter ran its completer in a subshell and completed nothing
+  until 0.126.2, which is why this never showed here.
+- [ ] **Carapace's common prefix still gets a double backslash.** (p2) [bug] With a partial
+  unquoted word (`dockerd --config-file my<Tab>`, files `my file.json` and `my other.json`), zsh
+  itself reports `compstate[unambiguous]` as `my\\ ` (carapace's doubly quoted words), and
+  fzf-tab's fast path inserts it; plain zsh inserts `my\ `. #584 only fixes the words fzf-tab
+  stores. Compare how plain zsh arrives at one backslash, then either fix the fast path's
+  unambiguous string the same way or skip the fast path for `-Q` words with `\\`. An empty word
+  works (both give `my\ `).
 - [ ] **fzf reads `FZF_DEFAULT_OPTS_FILE` inside fzf-tab (upstream PR #505).** (p2) [bug] fzf-tab
   clears `FZF_DEFAULT_OPTS` but fzf still reads the file, and `~/.config/fzf/fzfrc` sets
   `--preview="fzf-preview {}"` (fzf-tab's `{}` is its NUL-separated line, not a path) and
