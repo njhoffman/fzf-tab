@@ -63,14 +63,17 @@ Take each as a cherry-pick with its test, run the suite, note the PR in CHANGELO
   `fzf-tab.zsh:440`. Not visible in this shell (no `--` function after loading), but the line is
   wrong as written. Merges cleanly.
   Done 2026-11-22 (1.3.0+nj.10): #598 cherry-picked.
-- [ ] **`compadd -x` inserts the message as a match (upstream PR #592).** (p3) [bug] `zparseopts`
+- [x] **`compadd -x` inserts the message as a match (upstream PR #592).** (p3) [bug] `zparseopts`
   keeps `-x` in `$_mesg`, so `builtin compadd -x $_mesg` passes the option twice. Conflicts in
   `lib/ftb-tmux-popup`.
+  Done 2026-11-22 (1.3.0+nj.11): quoted as `${_mesg[-x]}`; the PR's `$_mesg[2]` drops the message
+  (the existing WARN case caught it).
 - [ ] **Messages from `_message` and `compadd -x` disappear (upstream #604).** (p3) [bug] When the
   widget returns 0 without candidates, zsh's message is wiped. No PR yet.
-- [ ] **Group switching with identical group colors (upstream #581, PR #585).** (p3) [bug] The
+- [x] **Group switching with identical group colors (upstream #581, PR #585).** (p3) [bug] The
   switch filters by color, so two groups with the same color switch together. Conflicts in
   `test/fzftab.ztst` only.
+  Done 2026-11-22 (1.3.0+nj.11): cherry-picked with its tests.
 - [x] **`$realpath` empty in execute bindings (upstream #575, PR #577).** (p3) [bug] Bindings like
   `ctrl-e:become(nvim $realpath)` get nothing. Merges cleanly.
   Done 2026-11-22 (1.3.0+nj.10): #577 cherry-picked.
@@ -80,9 +83,10 @@ Take each as a cherry-pick with its test, run the suite, note the PR in CHANGELO
 - [x] **`builtin cd` in the module build (upstream PR #594).** (p3) [bug] A `cd` function
   (zoxide) breaks `build-fzf-tab-module`. Merges cleanly.
   Done 2026-11-22 (1.3.0+nj.10): #594 cherry-picked.
-- [ ] **Nested popup with `--tmux`/`--popup` in fzf's options (upstream #587, PR #588).** (p3)
+- [x] **Nested popup with `--tmux`/`--popup` in fzf's options (upstream #587, PR #588).** (p3)
   [bug] Not in `fzfrc` today; matters once the popup is used with `use-fzf-default-opts`.
   Conflicts in `.gitignore` and `lib/ftb-tmux-popup`.
+  Done 2026-11-22 (1.3.0+nj.11): `--no-tmux` when the defaults (variable or file) have one.
 - [ ] **Extra space before the completion with a right prompt (upstream #535).** (p3) [bug] Seen
   with starship's left and right prompts; check with p10k's right prompt here before anything else.
 - [ ] **Continuous trigger on `pass` entries (upstream #367).** (p3) [test] `pass` paths are not

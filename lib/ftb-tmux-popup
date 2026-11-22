@@ -115,6 +115,12 @@ if [[ "$use_fzf_default_opts" == "yes" ]]; then
   fzf_default_opts=$FZF_DEFAULT_OPTS
   fzf_default_opts_file=${FZF_DEFAULT_OPTS_FILE-}
 fi
+# fzf inside the popup must not open a popup of its own (upstream #587): turn
+# off a --tmux/--popup from the defaults. Only when they have one, which also
+# means this fzf knows the option ($(<file) reads without a fork).
+if [[ "$fzf_default_opts ${fzf_default_opts_file:+$(<$fzf_default_opts_file)}" == *--(tmux|popup)* ]]; then
+  fzf_opts+=(--no-tmux)
+fi
 echo -E "env FZF_DEFAULT_OPTS=${(qq)fzf_default_opts} FZF_DEFAULT_OPTS_FILE=${(qq)fzf_default_opts_file} SHELL=$ZSH_NAME \
   $commands[fzf] ${(qq)fzf_opts[@]} \
   < $tmp_dir/completions.$$ > $tmp_dir/result-$$" > $tmp_dir/fzf-$$

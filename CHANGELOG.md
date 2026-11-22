@@ -7,6 +7,19 @@ fork counter (`1.3.0+nj.N`, see CLAUDE.md).
 
 ## [Unreleased]
 
+## [1.3.0+nj.11] - 2026-11-22
+
+### Fixed
+
+- Switching groups works when two groups share a color: the list keeps a hidden group number
+  for the filter and the header style (upstream #581, PR #585, cherry-picked with its tests).
+- A `compadd -x` message with spaces is passed as one argument; unquoted, the words after the
+  first became matches. Upstream PR #592's version (`$_mesg[2]`) drops the message: `_mesg` is
+  an associative array keyed `-x`, so this uses `${_mesg[-x]}`.
+- fzf inside the tmux popup no longer opens a popup of its own when fzf's defaults carry
+  `--tmux`/`--popup` (upstream #587): `--no-tmux` is added then, also for a defaults file, where
+  upstream PR #588 only edits the variable.
+
 ## [1.3.0+nj.10] - 2026-11-22
 
 ### Fixed

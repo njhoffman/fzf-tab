@@ -45,7 +45,9 @@ builtin unalias -m '[^+]*'
   local ret=$?
   if (( $#__hits == 0 )); then
     if is-at-least 5.9 && (( $#_mesg != 0 )); then
-      builtin compadd -x $_mesg
+      # _mesg is associative (zparseopts x:=_mesg): the message is its -x
+      # value, quoted, or a message with spaces adds its words as matches
+      builtin compadd -x "${_mesg[-x]}"
     fi
     return $ret
   fi

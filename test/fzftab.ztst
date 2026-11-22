@@ -401,6 +401,18 @@
 >defaults-file-kept
 >history-still-off
 
+  print -r -- '--cycle --tmux center' > fzfrc
+  comptesteval "export POPUP_LOG=$PWD/popup.log POPUP_SCREEN='0 10 0 5 40 120 on bottom' TMUX_PANE=%1 PATH=$PWD/popup-bin:\$PATH FZF_DEFAULT_OPTS_FILE=$PWD/fzfrc"
+  comptesteval "zstyle -d ':fzf-tab:*' debug-command; zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup; zstyle ':fzf-tab:*' use-fzf-default-opts yes"
+  comptest $'tst \t'
+  comptesteval "zstyle -d ':fzf-tab:*' fzf-command; zstyle -d ':fzf-tab:*' use-fzf-default-opts; unset TMUX_PANE FZF_DEFAULT_OPTS_FILE"
+  comptesteval "zstyle ':fzf-tab:*' debug-command $ZTST_srcdir/select -n 1 -h '\$#_ftb_headers' -q '\"\$_ftb_query\"'"
+  [[ $(<popup.log) == *"'--no-tmux'"* ]] && print no-nested-popup
+  rm -f fzfrc
+0:a --tmux in fzf's defaults does not open a popup inside the popup (upstream #587)
+>line: {tst }{}
+>no-nested-popup
+
   comptesteval "export POPUP_LOG=$PWD/popup.log POPUP_SCREEN='0 10 0 5 40 120 on bottom' TMUX_PANE=%1 PATH=$PWD/popup-bin:\$PATH"
   comptesteval "zstyle -d ':fzf-tab:*' debug-command; zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup; zstyle ':fzf-tab:complete:*' fzf-preview 'print -r -- \"word=\$word realpath=\$realpath\"'"
   comptest $': di\t'
