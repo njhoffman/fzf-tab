@@ -46,13 +46,16 @@ Take each as a cherry-pick with its test, run the suite, note the PR in CHANGELO
   works (both give `my\ `).
   Done 2026-11-22 (1.3.0+nj.7): #597's check (the string must start a candidate) covers it, since
   #584 stores the words with one backslash; test "carapace's doubly quoted words".
-- [ ] **fzf reads `FZF_DEFAULT_OPTS_FILE` inside fzf-tab (upstream PR #505).** (p2) [bug] fzf-tab
+- [x] **fzf reads `FZF_DEFAULT_OPTS_FILE` inside fzf-tab (upstream PR #505).** (p2) [bug] fzf-tab
   clears `FZF_DEFAULT_OPTS` but fzf still reads the file, and `~/.config/fzf/fzfrc` sets
   `--preview="fzf-preview {}"` (fzf-tab's `{}` is its NUL-separated line, not a path) and
   `--history=...` (completion queries end up in fzf's search history). Ignore the file unless
   `use-fzf-default-opts` is yes, as #505 does, and decide whether `~/.shell` should keep
   `use-fzf-default-opts yes` or pass only the bindings it wants through `fzf-flags`. Conflicts in
   `lib/-ftb-fzf` and `lib/ftb-tmux-popup`.
+  Done 2026-11-22 (1.3.0+nj.9): the file follows `use-fzf-default-opts`; with it, `--no-history`
+  and `--no-preview` (where no fzf-preview) on the command line. `~/.shell` keeps
+  `use-fzf-default-opts yes`, so fzfrc's colors and bindings stay.
 
 ## Upstream fixes, other
 
@@ -100,6 +103,8 @@ Take each as a cherry-pick with its test, run the suite, note the PR in CHANGELO
   but no workflow run exists: GitHub holds workflows on forks until they are enabled in the
   repository's Actions tab (a one-time click; needs the web UI). The workflows run the suite on
   Ubuntu and Arch, with and without the binary module.
+  2026-11-22: enabled in the Actions tab (Linux, macOS and Zsh workflows active); tick after the
+  first run on a push to master.
 - [ ] **Build the binary module on the hosts.** (p3) [perf] `FZF_TAB_MODULE_VERSION` is unset
   here, so list-colors go through the pure-zsh zsh-ls-colors. `build-fzf-tab-module` builds
   0.2.2 from the fork's (reformatted) source and the suite passes with it (checked 2026-11-22 in a

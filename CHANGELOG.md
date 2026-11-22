@@ -7,6 +7,18 @@ fork counter (`1.3.0+nj.N`, see CLAUDE.md).
 
 ## [Unreleased]
 
+## [1.3.0+nj.9] - 2026-11-22
+
+### Fixed
+
+- fzf's defaults file (`$FZF_DEFAULT_OPTS_FILE`) follows `use-fzf-default-opts` like
+  `$FZF_DEFAULT_OPTS`: without it fzf-tab ignores the file too (upstream PR #505 cleared only
+  the variable, as fzf-tab did). With it, two options that cannot work on fzf-tab's rows are
+  turned off on the command line, where `fzf-flags` can turn them on again: `--history` (completion
+  queries filled fzf's search history) and `--preview` where no `fzf-preview` applies (a
+  `--preview` from the defaults got fzf-tab's NUL-separated row for `{}`, not a path). In the tmux
+  popup as well.
+
 ## [1.3.0+nj.8] - 2026-11-22
 
 ### Fixed

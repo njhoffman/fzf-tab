@@ -109,11 +109,13 @@ fi
 popup_width=$(( min(min(max(comp_length + fzf_tmux_width_factor, popup_min_size[1]), window_width), popup_max_width) ))
 popup_x=$(( cursor_x + popup_width > window_width ? window_width - popup_width : cursor_x ))
 
-local fzf_default_opts=''
+# fzf's defaults (variable and file) only with use-fzf-default-opts; see -ftb-fzf
+local fzf_default_opts='' fzf_default_opts_file=''
 if [[ "$use_fzf_default_opts" == "yes" ]]; then
   fzf_default_opts=$FZF_DEFAULT_OPTS
+  fzf_default_opts_file=${FZF_DEFAULT_OPTS_FILE-}
 fi
-echo -E "env FZF_DEFAULT_OPTS=${(qq)fzf_default_opts} SHELL=$ZSH_NAME \
+echo -E "env FZF_DEFAULT_OPTS=${(qq)fzf_default_opts} FZF_DEFAULT_OPTS_FILE=${(qq)fzf_default_opts_file} SHELL=$ZSH_NAME \
   $commands[fzf] ${(qq)fzf_opts[@]} \
   < $tmp_dir/completions.$$ > $tmp_dir/result-$$" > $tmp_dir/fzf-$$
 {

@@ -371,10 +371,29 @@
   comptesteval "zstyle -d ':fzf-tab:*' fzf-command; zstyle -d ':fzf-tab:*' popup-border-style; unset TMUX_PANE"
   comptesteval "zstyle ':fzf-tab:*' debug-command $ZTST_srcdir/select -n 1 -h '\$#_ftb_headers' -q '\"\$_ftb_query\"'"
   print -r -- ${${(f)"$(<popup.log)"}[1]%% -w *}
-  rm -rf popup-bin popup.log
+  local log=$(<popup.log)
+  [[ $log == *"FZF_DEFAULT_OPTS_FILE=''"* ]] && print defaults-file-cleared
+  [[ $log == *"'--no-history'"* && $log == *"'--no-preview'"* ]] && print history-preview-off
 0:popup from a completion: runs in the completing shell, so its zstyles apply
 >line: {tst }{}
 >popup -x 5 -y 17 -b double -S fg=black
+>defaults-file-cleared
+>history-preview-off
+
+  comptesteval "export POPUP_LOG=$PWD/popup.log POPUP_SCREEN='0 10 0 5 40 120 on bottom' TMUX_PANE=%1 PATH=$PWD/popup-bin:\$PATH FZF_DEFAULT_OPTS_FILE=$PWD/fzfrc"
+  comptesteval "zstyle -d ':fzf-tab:*' debug-command; zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup; zstyle ':fzf-tab:*' use-fzf-default-opts yes"
+  comptesteval '_tst() { compadd alpha beta }'
+  comptest $'tst \t'
+  comptesteval "zstyle -d ':fzf-tab:*' fzf-command; zstyle -d ':fzf-tab:*' use-fzf-default-opts; unset TMUX_PANE FZF_DEFAULT_OPTS_FILE"
+  comptesteval "zstyle ':fzf-tab:*' debug-command $ZTST_srcdir/select -n 1 -h '\$#_ftb_headers' -q '\"\$_ftb_query\"'"
+  local log=$(<popup.log)
+  [[ $log == *"FZF_DEFAULT_OPTS_FILE=$PWD/fzfrc"* || $log == *"FZF_DEFAULT_OPTS_FILE='$PWD/fzfrc'"* ]] && print defaults-file-kept
+  [[ $log == *"'--no-history'"* ]] && print history-still-off
+  rm -rf popup-bin popup.log
+0:use-fzf-default-opts keeps fzf's defaults file; --history and --preview stay off
+>line: {tst }{}
+>defaults-file-kept
+>history-still-off
 
 
   comptesteval $'_tst() { local -a d=(\'alpha one\' \'beta two\'); compadd -Q -d d -- \'alpha\\\\ one\' \'beta\\\\ two\' }'

@@ -83,14 +83,21 @@ fi
 
 command cat > $tmp_dir/completions.$$
 
-local fzf_default_opts=''
+# fzf's defaults: $FZF_DEFAULT_OPTS and the file $FZF_DEFAULT_OPTS_FILE names
+# (fzf reads both), only with use-fzf-default-opts (upstream #505 cleared only
+# the variable). Two of their options cannot work on fzf-tab's rows, so the
+# command line turns them off (fzf-flags can turn them on again): --history
+# (completion queries would fill fzf's search history) and --preview, unless
+# fzf-preview gives one ({} is fzf-tab's NUL-separated row, not a path).
+local fzf_default_opts='' fzf_default_opts_file=''
 if [[ "$use_fzf_default_opts" == "yes" ]]; then
   fzf_default_opts=$FZF_DEFAULT_OPTS
+  fzf_default_opts_file=${FZF_DEFAULT_OPTS_FILE-}
 fi
 
 #   --nth=2,3 \  https://github.com/Aloxaf/fzf-tab/pull/528
 #   --width=${FZF_TMUX_WIDTH:-80} \
-FZF_DEFAULT_OPTS=$fzf_default_opts SHELL=$ZSH_NAME ${(z)fzf_command} \
+FZF_DEFAULT_OPTS=$fzf_default_opts FZF_DEFAULT_OPTS_FILE=$fzf_default_opts_file SHELL=$ZSH_NAME ${(z)fzf_command} \
   --ansi \
   --bind=$binds \
   --bind="${switch_group[1]}:reload($reload_command -1),${switch_group[2]}:reload($reload_command 1)" \
@@ -105,7 +112,9 @@ FZF_DEFAULT_OPTS=$fzf_default_opts SHELL=$ZSH_NAME ${(z)fzf_command} \
   --print-query \
   --query=$_ftb_query \
   --tiebreak=begin \
+  --no-history \
   ${fzf_preview:+--preview=${ftb_preview_init}$fzf_preview} \
+  ${fzf_preview:---no-preview} \
   $fzf_flags < $tmp_dir/completions.$$ || ret=$?
 
 # log fzf flags and options
