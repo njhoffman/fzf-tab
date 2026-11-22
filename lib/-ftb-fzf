@@ -76,8 +76,10 @@ else
   echoti cnorm >/dev/tty 2>/dev/null
 fi
 
-
-[[ -n "$FZF_TAB_HOME" ]] && fzf_command="${FZF_TAB_HOME}/lib/${fzf_command}"
+# ftb-fzf and ftb-tmux-popup are autoloaded functions (fzf-tab.zsh): called by
+# name they run in this shell and see its zstyles, $_ftb_curcontext, $tmp_dir
+# and fzf_tmux_width_factor. Run by path they were a separate zsh with none of
+# those, so every popup option fell back to its default.
 
 command cat > $tmp_dir/completions.$$
 

@@ -4,7 +4,8 @@
 # (every new shell sources it). Times come from zsh/datetime, not date(1).
 zmodload -F zsh/datetime p:EPOCHSECONDS b:strftime
 
-__LOGDIR='/tmp/fzf-tab/'
+# per user, next to -ftb-fzf's completion files; fzf-tab-debug creates it
+__LOGDIR=${TMPPREFIX:-/tmp/zsh}-fzf-tab-$USER
 typeset -g __START_TIME=${__START_TIME:-$EPOCHSECONDS}
 
 __util_log() {

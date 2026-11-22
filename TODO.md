@@ -6,24 +6,26 @@ Categories: bug feature refactor docs test chore perf
 
 ## Cleanup
 
-- [ ] **Debug log path.** (p3) [bug] `__LOGDIR='/tmp/fzf-tab/'` makes the trace file
+- [ ] **A custom `fzf-command` is ignored.** (p3) [bug] `lib/-ftb-fzf` replaces any
+  `fzf-command` other than `ftb-tmux-popup` with `ftb-fzf` (`$commands[fzf]`), so upstream's
+  `zstyle ':fzf-tab:*' fzf-command sk` (or an fzf with flags) no longer works. Run the configured
+  command, and fall back to `ftb-fzf` only for the default.
+- [x] **Debug log path.** (p3) [bug] `__LOGDIR='/tmp/fzf-tab/'` makes the trace file
   `/tmp/fzf-tab/-PID-fzf-tab-N.log` (a leading dash, a directory that may not exist); upstream used
   `${TMPPREFIX:-/tmp/zsh}-PID-fzf-tab-N.log`. Pick one and create the directory.
+  Done 2026-11-22 (1.3.0+nj.4): `${TMPPREFIX:-/tmp/zsh}-fzf-tab-$USER/debug-PID-N.log`, the
+  directory created with mode 700.
 - [ ] **Unfinished stubs and TODO comments.** (p3) [refactor] `fzf-tab-complete-popup() { }` is an
   empty widget ("if TMUX available force popup"); `__util_log` is half commented out; the
   `# __log_*` call sites in `lib/ftb-tmux-popup` and `fzf-tab.zsh` do nothing. Finish or remove.
-- [ ] **Generated `README` man page.** (p3) [docs] zinit's z-a-man writes `README` (ronn output,
+- [x] **Generated `README` man page.** (p3) [docs] zinit's z-a-man writes `README` (ronn output,
   September 2023) next to `README.md`; it is stale. Stop committing it (`.gitignore`) or
   regenerate it with each release.
-- [ ] **Document the fork's zstyles in README.md.** (p3) [docs] The popup options,
+  Done 2026-11-22 (1.3.0+nj.4): untracked and ignored; z-a-man still writes it locally.
+- [x] **Document the fork's zstyles in README.md.** (p3) [docs] The popup options,
   `use-fzf-default-opts`, `fzf-tmux-width-factor` and the multi-key `continuous-trigger` are only
   in the code and CHANGELOG.md.
-
-## Tests
-
-- [ ] **No tests for the fork's popup options.** (p3) [test] `test/fzftab.ztst` covers
-  completion, not `lib/ftb-tmux-popup` (it needs tmux); a test with a stub `tmux` that records the
-  `display-popup` arguments would cover the size and border options.
+  Done 2026-11-22 (1.3.0+nj.4): README.md "Fork additions".
 
 ## Completed
 
@@ -50,3 +52,11 @@ Categories: bug feature refactor docs test chore perf
 - [x] **ftb-tmux-popup sources util.zsh on every popup.** (p3) [perf] Only for logging helpers
   that are commented out at their call sites.
   Done 2026-11-22 (1.3.0+nj.3): no longer sourced there; its logging calls stay commented out.
+
+### Tests (completed 2026-11-22)
+
+- [x] **No tests for the fork's popup options.** (p3) [test] `test/fzftab.ztst` covers
+  completion, not `lib/ftb-tmux-popup` (it needs tmux); a test with a stub `tmux` that records the
+  `display-popup` arguments would cover the size and border options.
+  Done 2026-11-22 (1.3.0+nj.4): `test/popup-tmux` plus three cases. The end-to-end one found
+  that the popup ran by path in a separate zsh and ignored every popup zstyle (fixed).

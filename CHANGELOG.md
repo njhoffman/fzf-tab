@@ -7,6 +7,31 @@ fork counter (`1.3.0+nj.N`, see CLAUDE.md).
 
 ## [Unreleased]
 
+## [1.3.0+nj.4] - 2026-11-22
+
+### Fixed
+
+- The tmux popup's zstyles apply again: since 2025-08-02 `lib/-ftb-fzf` ran `ftb-tmux-popup` (and
+  `ftb-fzf`) by path, as a separate zsh that sees none of the completing shell's zstyles, so
+  `popup-border-style`, `popup-border-color`, `popup-max-height`, `popup-max-width`,
+  `popup-smart-tab-bindings`, `use-fzf-default-opts` and `fzf-tmux-width-factor` all fell back to
+  their defaults. They are autoloaded functions and are called by name again, as upstream does.
+- `fzf-tab-debug` writes its trace to `${TMPPREFIX:-/tmp/zsh}-fzf-tab-$USER/debug-PID-N.log` (the
+  per-user directory fzf-tab already uses, created with mode 700), not
+  `/tmp/fzf-tab/-PID-fzf-tab-N.log` in a directory that might not exist.
+
+### Added
+
+- README.md documents the fork's zstyles (continuous-trigger keys, active-group-style values, the
+  popup options).
+- Tests for the popup options (a stub tmux records `display-popup`'s arguments), including one
+  through a real completion.
+
+### Removed
+
+- `README`, the man page zinit's z-a-man generates from README.md, is no longer committed
+  (`.gitignore`); z-a-man still writes it locally.
+
 ## [1.3.0+nj.3] - 2026-11-22
 
 ### Fixed
@@ -37,8 +62,7 @@ merged with upstream's master at 24105b1 (v1.3.0 and 3 commits).
 - tmux popup options: `popup-border-style`, `popup-border-color`, `popup-max-height`,
   `popup-max-width`, `popup-smart-tab-bindings` (the tab/btab bindings when the popup opens above
   the cursor), `fzf-tmux-width-factor` (added to the candidates' width).
-- `use-fzf-default-opts`: pass `$FZF_DEFAULT_OPTS` to fzf (fzf-tab clears it otherwise), in the
-  popup too.
+- `use-fzf-default-opts` (upstream's) applies to the tmux popup too.
 - `lib/ftb-fzf`, the fzf wrapper the non-popup path runs; `util.zsh` logging helpers.
 - `active-group-style` accepts `italic` and `bold,italic` (the fork drew the active group header
   bold italic before upstream's option existed).

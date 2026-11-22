@@ -1,2 +1,4 @@
 *.zwc
 zsdoc/
+# man page that zinit's z-a-man generates from README.md on install and update
+/README

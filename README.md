@@ -143,6 +143,46 @@ ls | ftb-tmux-popup
 
 For more information, please see [Wiki#Configuration](https://github.com/Aloxaf/fzf-tab/wiki/Configuration).
 
+## Fork additions
+
+This fork (`njhoffman/fzf-tab`) adds these zstyles to upstream's; see CHANGELOG.md for when.
+
+Continuous completion:
+
+```zsh
+# several keys: / goes on into a directory, a space accepts the selection as an argument
+# and completes the next one (after a directory it adds the space; a lone next candidate
+# is not inserted). One key, as upstream, still works. Default: /
+zstyle ':fzf-tab:*' continuous-trigger / ' '
+```
+
+Group headers:
+
+```zsh
+# the selected group's header: bold (default), underline, bold,underline, none, and here
+# also italic and bold,italic
+zstyle ':fzf-tab:*' active-group-style bold,italic
+```
+
+tmux popup (`fzf-command ftb-tmux-popup`), next to upstream's `popup-pad`, `popup-min-size` and
+`popup-smart-tab`:
+
+```zsh
+# the popup's border, as tmux display-popup -b and -S take them
+zstyle ':fzf-tab:*' popup-border-style rounded      # default rounded
+zstyle ':fzf-tab:*' popup-border-color fg=black     # default fg=black
+# upper bounds for the popup, in cells (default: the window's size)
+zstyle ':fzf-tab:*' popup-max-height 20
+zstyle ':fzf-tab:*' popup-max-width 100
+# added to the widest candidate to size the popup (default 5)
+zstyle ':fzf-tab:*' fzf-tmux-width-factor 25
+# the bindings popup-smart-tab adds when the popup opens above the cursor, where the list
+# is upside down (default tab:up btab:down)
+zstyle ':fzf-tab:*' popup-smart-tab-bindings 'tab:toggle+up' 'btab:toggle+down'
+# use-fzf-default-opts (upstream's) also applies to the popup
+zstyle ':fzf-tab:*' use-fzf-default-opts yes
+```
+
 ## Binary module
 
 By default, fzf-tab uses [zsh-ls-colors](https://github.com/xPMo/zsh-ls-colors) to parse and apply ZLS_COLORS if you have set the `list-colors` tag.

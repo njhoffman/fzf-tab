@@ -230,7 +230,8 @@ _fzf-tab-apply() {
 
 fzf-tab-debug() {
   (( $+_ftb_debug_cnt )) || typeset -gi _ftb_debug_cnt
-  local debuglog="${__LOGDIR}-$$-fzf-tab-$(( ++_ftb_debug_cnt )).log"
+  local debuglog="$__LOGDIR/debug-$$-$(( ++_ftb_debug_cnt )).log"
+  [[ -d $__LOGDIR ]] || command mkdir -p -m 700 -- $__LOGDIR
 
   local -i debug_fd=-1 IN_FZF_TAB=1
   {

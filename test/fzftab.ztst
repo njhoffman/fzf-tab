@@ -303,6 +303,57 @@
   [[ ! -e $ZTST_srcdir/date.called ]]
 0:util.zsh (sourced at every shell start) runs no date
 
+
+  mkdir -p popup-bin
+  ln -sf $ZTST_srcdir/popup-tmux popup-bin/tmux
+  fpath=($ZTST_srcdir/../lib $fpath)
+  autoload -Uz ftb-tmux-popup
+  (
+    export POPUP_LOG=$PWD/popup.log POPUP_SCREEN='0 10 0 5 40 120 on bottom' TMUX_PANE=%1 PATH=$PWD/popup-bin:$PATH
+    zstyle ':fzf-tab:*' popup-border-style double
+    zstyle ':fzf-tab:*' popup-border-color fg=red
+    zstyle ':fzf-tab:*' popup-max-width 12
+    zstyle ':fzf-tab:*' popup-max-height 3
+    print -l ${(l:30::x:)} a b c d e f g h | ftb-tmux-popup >/dev/null 2>&1
+  )
+  print -r -- ${${(f)"$(<popup.log)"}[1]%% -d *}
+  [[ $(<popup.log) == *--layout=reverse* ]] && print below
+0:popup: border style and color, maximum width and height
+>popup -x 5 -y 18 -b double -S fg=red -w 12 -h 7
+>below
+
+  (
+    export POPUP_LOG=$PWD/popup.log POPUP_SCREEN='0 30 0 5 40 120 on bottom' TMUX_PANE=%1 PATH=$PWD/popup-bin:$PATH
+    export FZF_DEFAULT_OPTS=--cycle
+    zstyle ':fzf-tab:*' popup-smart-tab-bindings 'tab:toggle+up' 'btab:toggle+down'
+    zstyle ':fzf-tab:*' use-fzf-default-opts yes
+    local fzf_tmux_width_factor=4
+    print -l abc de | ftb-tmux-popup >/dev/null 2>&1
+  )
+  print -r -- ${${(f)"$(<popup.log)"}[1]%% -d *}
+  local log=$(<popup.log)
+  [[ $log == *--layout=default* ]] && print above
+  [[ $log == *--bind=tab:toggle+up,btab:toggle+down* ]] && print smart-tab
+  [[ $log == *"FZF_DEFAULT_OPTS='--cycle'"* ]] && print default-opts
+0:popup: smart-tab bindings above the cursor, width factor, FZF_DEFAULT_OPTS
+>popup -x 5 -y 30 -b rounded -S fg=black -w 7 -h 6
+>above
+>smart-tab
+>default-opts
+
+
+  comptesteval "export POPUP_LOG=$PWD/popup.log POPUP_SCREEN='0 10 0 5 40 120 on bottom' TMUX_PANE=%1 PATH=$PWD/popup-bin:\$PATH"
+  comptesteval "zstyle -d ':fzf-tab:*' debug-command; zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup; zstyle ':fzf-tab:*' popup-border-style double"
+  comptesteval '_tst() { compadd alpha beta }'
+  comptest $'tst \t'
+  comptesteval "zstyle -d ':fzf-tab:*' fzf-command; zstyle -d ':fzf-tab:*' popup-border-style; unset TMUX_PANE"
+  comptesteval "zstyle ':fzf-tab:*' debug-command $ZTST_srcdir/select -n 1 -h '\$#_ftb_headers' -q '\"\$_ftb_query\"'"
+  print -r -- ${${(f)"$(<popup.log)"}[1]%% -w *}
+  rm -rf popup-bin popup.log
+0:popup from a completion: runs in the completing shell, so its zstyles apply
+>line: {tst }{}
+>popup -x 5 -y 17 -b double -S fg=black
+
 %clean
 
   zmodload -ui zsh/zpty
