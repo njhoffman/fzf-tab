@@ -1,15 +1,9 @@
-#!/usr/bin/env zsh
-
 # temporarily change options
 'builtin' 'local' '-a' '_ftb_opts'
 [[ ! -o 'aliases'         ]] || _ftb_opts+=('aliases')
 [[ ! -o 'sh_glob'         ]] || _ftb_opts+=('sh_glob')
 [[ ! -o 'no_brace_expand' ]] || _ftb_opts+=('no_brace_expand')
 'builtin' 'setopt' 'no_aliases' 'no_sh_glob' 'brace_expand'
-
-# load common functions
-FZF_TAB_HOME="${FZF_TAB_HOME:-${0:A:h}}"
-source "${0:A:h}/util.zsh"
 
 # disable aliases
 typeset _ftb_aliases="$(builtin alias -Lm '[^+]*')"
@@ -132,8 +126,6 @@ builtin unalias -m '[^+]*'
       _ftb_compcap+=$dscr$'\2'$__tmp_value$'\0word\0'$word
     done
   fi
-
-  # __log_completions_stats
 
   # tell zsh that the match is successful
   builtin compadd "$@"
@@ -343,8 +335,10 @@ _fzf-tab-apply() {
 
 fzf-tab-debug() {
   (( $+_ftb_debug_cnt )) || typeset -gi _ftb_debug_cnt
-  local debuglog="$__LOGDIR/debug-$$-$(( ++_ftb_debug_cnt )).log"
-  [[ -d $__LOGDIR ]] || command mkdir -p -m 700 -- $__LOGDIR
+  # per user, next to -ftb-fzf's completion files
+  local logdir=${TMPPREFIX:-/tmp/zsh}-fzf-tab-$USER
+  local debuglog="$logdir/debug-$$-$(( ++_ftb_debug_cnt )).log"
+  [[ -d $logdir ]] || command mkdir -p -m 700 -- $logdir
 
   local -i debug_fd=-1 IN_FZF_TAB=1
   {
@@ -404,13 +398,9 @@ fzf-tab-complete() {
   done
   echoti cnorm >/dev/tty 2>/dev/null
   zle .redisplay
-  # zle redisplay
   (( _ftb_accept )) && zle .accept-line
   return $ret
 }
-
-# TODO: if TMUX available force popup 
-fzf-tab-complete-popup() { }
 
 # this function does nothing, it is used to be wrapped by other plugins like f-sy-h.
 # this make it possible to call the wrapper function without causing any other side effects.
@@ -418,7 +408,6 @@ fzf-tab-dummy() { }
 
 zle -N fzf-tab-debug
 zle -N fzf-tab-complete
-zle -N fzf-tab-complete-popup
 zle -N fzf-tab-dummy
 # this is registered as a completion widget
 # so that we can have a clean completion list to only insert the results user selected

@@ -9,15 +9,18 @@ Scanned 2026-11-22: upstream's 88 open issues and 27 open PRs (the fork has issu
 
 ## Upstream overlap
 
+- [ ] **Check upstream for new issues, PRs and commits.** (p3) [chore] Recurring, every week or
+  two. Last checked 2026-11-22: 88 open issues, 27 open PRs, upstream/master at 24105b1 (all
+  merged). `git fetch upstream; git log master..upstream/master`; `gh issue list -R
+  Aloxaf/fzf-tab --search "updated:>DATE"` and the same for `gh pr list`. Add an item for each one
+  that affects this setup, merge new commits as CLAUDE.md says, then update the date here. Never
+  comment, open PRs or file issues upstream.
+
 - [ ] **Upstream PRs duplicate the fork's popup features.** (p3) [chore] #543 (`popup-max-height`,
   `popup-max-width`: the fork's names), #523 (`popup-smart-tab-bindings`: same name) and #542 (the
   `--style` height adjustment the fork has) are open upstream by other authors. If they merge,
   take upstream's versions in the next sync and drop the fork's copies. #582 adds `reverse` to
   `active-group-style` next to the fork's `italic`/`bold,italic`: align the token lists.
-- [ ] **Offer the fork's own changes upstream.** (p3) [chore] The multi-key `continuous-trigger`
-  (space for the next argument) and the `italic` header styles have no upstream equivalent; small
-  PRs would shrink the fork's diff. #304 (continuous completion without auto-entering single-child
-  directories) is the request closest to the space trigger.
 
 ## CI and build
 
@@ -45,9 +48,11 @@ Scanned 2026-11-22: upstream's 88 open issues and 27 open PRs (the fork has issu
   `${TMPPREFIX:-/tmp/zsh}-PID-fzf-tab-N.log`. Pick one and create the directory.
   Done 2026-11-22 (1.3.0+nj.4): `${TMPPREFIX:-/tmp/zsh}-fzf-tab-$USER/debug-PID-N.log`, the
   directory created with mode 700.
-- [ ] **Unfinished stubs and TODO comments.** (p3) [refactor] `fzf-tab-complete-popup() { }` is an
+- [x] **Unfinished stubs and TODO comments.** (p3) [refactor] `fzf-tab-complete-popup() { }` is an
   empty widget ("if TMUX available force popup"); `__util_log` is half commented out; the
   `# __log_*` call sites in `lib/ftb-tmux-popup` and `fzf-tab.zsh` do nothing. Finish or remove.
+  Done 2026-11-22 (1.3.0+nj.15): removed (`util.zsh`, the stub widget, the dead log calls);
+  upstream's own TODO comments stay.
 - [x] **Generated `README` man page.** (p3) [docs] zinit's z-a-man writes `README` (ronn output,
   September 2023) next to `README.md`; it is stale. Stop committing it (`.gitignore`) or
   regenerate it with each release.

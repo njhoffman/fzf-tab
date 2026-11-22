@@ -7,6 +7,14 @@ fork counter (`1.3.0+nj.N`, see CLAUDE.md).
 
 ## [Unreleased]
 
+## [1.3.0+nj.15] - 2026-11-22
+
+### Removed
+
+- `util.zsh` (logging helpers nothing called; `fzf-tab-debug` keeps its per-user log directory
+  itself), the empty `fzf-tab-complete-popup` widget, and the commented-out log calls and
+  leftover lines in `lib/-ftb-fzf` and `lib/ftb-tmux-popup`.
+
 ## [1.3.0+nj.14] - 2026-11-22
 
 ### Fixed

@@ -27,7 +27,7 @@ Guidance for Claude Code in this repository: `njhoffman/fzf-tab`, a fork of
 - `lib/-ftb-fzf`: builds the fzf command line (bindings, `--expect` keys, preview from
   `lib/-ftb-preview.tpl`); `lib/ftb-fzf`: the fork's fzf wrapper; `lib/ftb-tmux-popup`: the tmux
   popup command; `lib/ftb-switch-group`: group switching (`active-group-style`).
-- `modules/`: the optional C module (`build-fzf-tab-module`); `util.zsh`: the fork's logging helpers.
+- `modules/`: the optional C module (`build-fzf-tab-module`).
 - `README` (not tracked, `.gitignore`): the man page zinit's z-a-man annex generates from
   `README.md`. The fork's zstyles are documented in README.md's "Fork additions".
 - `ftb-fzf` and `ftb-tmux-popup` are autoloaded functions: call them by name, never by path, or
@@ -37,6 +37,8 @@ Guidance for Claude Code in this repository: `njhoffman/fzf-tab`, a fork of
 
 - Remotes: `origin` (this fork), `upstream` (Aloxaf). `master` is the fork's branch; the local
   `upstream` branch tracks `upstream/master`.
+- Check upstream now and then for new issues, PRs and commits (the recurring item in TODO.md has
+  the last date and the commands), and read only: never comment, open PRs or file issues there.
 - Sync by merging `upstream/master` into `master` (never rebase: `origin/master` is published).
   Resolve conflicts keeping the fork's features and upstream's fixes, and list each resolution in
   the merge commit.

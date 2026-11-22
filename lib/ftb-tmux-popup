@@ -6,8 +6,6 @@
 #   zstyle ':fzf-tab:*' popup-pad 0 0
 #   ls | ftb-tmux-popup (standalone usage)
 
-# util.zsh's logging helpers are not sourced here: this runs for every popup,
-# and their call sites below are commented out (source it to use them)
 FZF_TAB_HOME="${FZF_TAB_HOME:-${0:A:h}/..}"
 
 emulate -L zsh -o extended_glob
@@ -104,8 +102,6 @@ else
 fi
 
 # calculate the popup width and x position
-# popup_width=$(( min(max(comp_length + , popup_min_size[1]), window_width) ))
-# popup_width=$(( min(min(max(comp_length + 5, popup_min_size[1]), window_width), popup_max_width) ))
 popup_width=$(( min(min(max(comp_length + fzf_tmux_width_factor, popup_min_size[1]), window_width), popup_max_width) ))
 popup_x=$(( cursor_x + popup_width > window_width ? window_width - popup_width : cursor_x ))
 
@@ -125,7 +121,6 @@ echo -E "env FZF_DEFAULT_OPTS=${(qq)fzf_default_opts} FZF_DEFAULT_OPTS_FILE=${(q
   $commands[fzf] ${(qq)fzf_opts[@]} \
   < $tmp_dir/completions.$$ > $tmp_dir/result-$$" > $tmp_dir/fzf-$$
 {
-  # __log_options
   tmux popup -x $popup_x -y $popup_y \
        -b $popup_border_style \
        -S $popup_border_color \
@@ -133,7 +128,6 @@ echo -E "env FZF_DEFAULT_OPTS=${(qq)fzf_default_opts} FZF_DEFAULT_OPTS_FILE=${(q
        -d $PWD -E ". $tmp_dir/fzf-$$" || ret=$?
   echo -E "$(<$tmp_dir/result-$$)"
 } always {
-  # __log_selection_info
   command rm $tmp_dir/*-$$
   (( $+IN_FZF_TAB )) || command rm $tmp_dir/completions.$$
 }

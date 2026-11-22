@@ -325,14 +325,6 @@
 >C0:{beta}
 >line: {tst alpha }{}
 
-  rm -f $ZTST_srcdir/date.called
-  date() { print -r called >> $ZTST_srcdir/date.called }
-  source $ZTST_srcdir/../util.zsh
-  __util_log message >/dev/null
-  unfunction date
-  [[ ! -e $ZTST_srcdir/date.called ]]
-0:util.zsh (sourced at every shell start) runs no date
-
 
   mkdir -p popup-bin
   ln -sf $ZTST_srcdir/popup-tmux popup-bin/tmux
