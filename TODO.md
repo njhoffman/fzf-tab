@@ -6,13 +6,16 @@ Categories: bug feature refactor docs test chore perf
 
 ## Loading
 
-- [ ] **zinit loads the local `upstream` branch, not `master`.** (p1) [chore] The checkout was
+- [x] **zinit loads the local `upstream` branch, not `master`.** (p1) [chore] The checkout was
   switched to `upstream` (upstream's code, 24105b1) on 2026-10-22, so none of the fork's features
   (popup options, `use-fzf-default-opts`, the space continuous trigger) run in new shells, and
   `~/.shell`'s zstyles for them do nothing. `master` now has upstream's code merged in. Switch the
   checkout to `master` (`git switch master`), then open a few shells and try completions (paths,
   git, a tmux popup) before relying on it. With `master` loaded, set
   `zstyle ':fzf-tab:*' active-group-style bold,italic` in `~/.shell` to keep the old header look.
+  Done 2026-11-22: the checkout is on `master` (1.3.0+nj.2), `~/.shell` 0.125.1 sets
+  `active-group-style bold,italic` and the two-key `continuous-trigger`; paths, git and systemctl
+  completions checked in fresh shells under tmux.
 
 ## Performance
 
