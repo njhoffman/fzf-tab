@@ -10,6 +10,19 @@ zmathfunc
 
 local tmp_dir=${TMPPREFIX:-/tmp/zsh}-fzf-tab-$USER
 [[ -d $tmp_dir ]] || command mkdir $tmp_dir
+# Files of shells that died while fzf was open (a closed terminal, a killed
+# tmux server) are never removed by their own cleanup below: drop those whose
+# PID suffix (NAME.PID, popup NAME-PID) is no running process. kill -0 is a
+# builtin, so this forks only when there is something to remove.
+() {
+  local f pid
+  local -a stale=()
+  for f in $tmp_dir/*[.-]<->(N); do
+    pid=${f##*[.-]}
+    (( pid == $$ )) || kill -0 $pid 2>/dev/null || stale+=($f)
+  done
+  (( $#stale )) && command rm -f -- $stale
+}
 
 local ftb_preview_init
 ftb_preview_init=$(<"$FZF_TAB_HOME/lib/-ftb-preview.tpl")

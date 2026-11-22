@@ -211,7 +211,13 @@ builtin unalias -m '[^+]*'
   }
 
   case $#_ftb_complist in
-    0) return 1;;
+    0)
+      # No candidates: keep the original widget's list, which holds the
+      # explanations from _message and compadd -x; _fzf-tab-apply would clear
+      # it when the widget returned 0 anyway (upstream #604)
+      _ftb_finish=1
+      return 1
+      ;;
     1)
       # After a space, a lone next argument is left for the user to pick:
       # completion stops with the cursor after the space (inserting it would

@@ -7,6 +7,17 @@ fork counter (`1.3.0+nj.N`, see CLAUDE.md).
 
 ## [Unreleased]
 
+## [1.3.0+nj.14] - 2026-11-22
+
+### Fixed
+
+- Messages from `_message` and `compadd -x` stay visible when completion finds nothing and the
+  Tab widget still returns 0 (a wrapper that ends in `zle redisplay`): fzf-tab's apply step
+  cleared zsh's list that holds them (upstream #604, its suggested fix; the warnings test now
+  clears the list before its `clear-screen`, which redrew it into the log a second time).
+- Temporary files of shells that died while fzf was open are removed the next time fzf-tab uses
+  its directory: files whose PID suffix is no running process of yours.
+
 ## [1.3.0+nj.13] - 2026-11-22
 
 ### Fixed

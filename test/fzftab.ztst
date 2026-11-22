@@ -42,6 +42,7 @@
     print -lr "<WIDGET><fzf-tab-complete>"
     zle fzf-tab-complete 2>&1
     print -lr - "<LBUFFER>$LBUFFER</LBUFFER>" "<RBUFFER>$RBUFFER</RBUFFER>"
+    zle -R -c
     zle clear-screen
     zle -R
   }
@@ -578,6 +579,24 @@
 0:a custom fzf-command runs as configured (not replaced by ftb-fzf)
 >line: {tst }{}
 >stub-ran
+
+  mkdir -p $PWD/tmpx-fzf-tab-$USER
+  : > $PWD/tmpx-fzf-tab-$USER/compcap.999999999
+  : > $PWD/tmpx-fzf-tab-$USER/fzf-999999999
+  : > $PWD/tmpx-fzf-tab-$USER/compcap.$$
+  comptesteval "TMPPREFIX=$PWD/tmpx"
+  comptesteval '_tst() { compadd alpha beta }'
+  comptest $'tst \t'
+  comptesteval "unset TMPPREFIX"
+  local -a left=($PWD/tmpx-fzf-tab-$USER/*(N:t))
+  print -r -- ${left//$$/LIVE}
+  rm -rf $PWD/tmpx-fzf-tab-$USER
+0:temporary files of shells that are gone are removed; a running shell's are kept
+>line: {tst alpha }{}
+>QUERY:{}
+>C0:{alpha}
+>C0:{beta}
+>compcap.LIVE
 
 %clean
 

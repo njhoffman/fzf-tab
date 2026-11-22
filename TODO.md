@@ -7,98 +7,6 @@ Categories: bug feature refactor docs test chore perf
 Scanned 2026-11-22: upstream's 88 open issues and 27 open PRs (the fork has issues off and no PRs).
 "Merges cleanly" means `git merge-tree` of the PR against master had no conflicts that day.
 
-## Upstream fixes for this setup
-
-Bugs with an open upstream PR that the options in `~/.shell` hit (`COMPLETE_IN_WORD`, the
-case-insensitive and subsequence `matcher-list`, `_match`/`_approximate`, carapace adapters).
-Take each as a cherry-pick with its test, run the suite, note the PR in CHANGELOG.md.
-
-- [x] **Tab inside a word does nothing with `complete_in_word` (upstream #603).** (p2) [bug]
-  `ls ab|x` with two matches never opens fzf, and Tab again repeats the no-op. `~/.shell` sets
-  `COMPLETE_IN_WORD`. Conflicts with master in `fzf-tab.zsh`.
-  Done 2026-11-22 (1.3.0+nj.8): #603's comparison and its test.
-- [x] **Case-insensitive matches insert one case-twin (upstream #589, PR #600).** (p2) [bug] With
-  `m:{a-z}={A-Z}` (in `~/.shell`'s `matcher-list`), `Foo` and `foo` both matching makes zsh report
-  one as unambiguous and fzf-tab inserts it without the picker. Conflicts in `fzf-tab.zsh`.
-  Done 2026-11-22 (1.3.0+nj.7): `-ftb-unambiguous-safe` combines #597, #576 and #600, with their tests.
-- [x] **Subsequence matchers bias toward one candidate (upstream #560, PR #576).** (p2) [bug]
-  `~/.shell`'s last `matcher-list` entries (`r:[[:ascii:]]||[[:ascii:]]=**`) produce a
-  `compstate[unambiguous]` that is not a substring of every candidate; fzf-tab inserts it instead
-  of showing the picker. Conflicts in `fzf-tab.zsh`; take it with #597 below, same code.
-  Done 2026-11-22 (1.3.0+nj.7): `-ftb-unambiguous-safe` combines #597, #576 and #600, with their tests.
-- [x] **The unambiguous fast path can rewrite the word destructively (upstream PR #597).** (p2)
-  [bug] Two guards on the fast path in `-ftb-complete` (unambiguous shorter than the word, or not
-  a prefix of it). Same block as #576 and #600: merge the three together.
-  Done 2026-11-22 (1.3.0+nj.7): `-ftb-unambiguous-safe` combines #597, #576 and #600, with their tests.
-- [x] **Carapace's pre-quoted words get a literal double backslash (upstream #503, PR #584).**
-  (p2) [bug] `path\\ file` lands on the command line for completions that come through carapace
-  (`~/.shell`'s zsh-complete caches carapace gap adapters). Merges cleanly. Related: #601, a
-  carapace file completion inside a directory starts with query `dir/` and shows 0/N (no PR).
-  Done 2026-11-22 (1.3.0+nj.5): #584 cherry-picked, plus a test (`-Q` words with a doubled
-  backslash). `~/.shell`'s carapace adapter ran its completer in a subshell and completed nothing
-  until 0.126.2, which is why this never showed here.
-- [x] **Carapace's common prefix still gets a double backslash.** (p2) [bug] With a partial
-  unquoted word (`dockerd --config-file my<Tab>`, files `my file.json` and `my other.json`), zsh
-  itself reports `compstate[unambiguous]` as `my\\ ` (carapace's doubly quoted words), and
-  fzf-tab's fast path inserts it; plain zsh inserts `my\ `. #584 only fixes the words fzf-tab
-  stores. Compare how plain zsh arrives at one backslash, then either fix the fast path's
-  unambiguous string the same way or skip the fast path for `-Q` words with `\\`. An empty word
-  works (both give `my\ `).
-  Done 2026-11-22 (1.3.0+nj.7): #597's check (the string must start a candidate) covers it, since
-  #584 stores the words with one backslash; test "carapace's doubly quoted words".
-- [x] **fzf reads `FZF_DEFAULT_OPTS_FILE` inside fzf-tab (upstream PR #505).** (p2) [bug] fzf-tab
-  clears `FZF_DEFAULT_OPTS` but fzf still reads the file, and `~/.config/fzf/fzfrc` sets
-  `--preview="fzf-preview {}"` (fzf-tab's `{}` is its NUL-separated line, not a path) and
-  `--history=...` (completion queries end up in fzf's search history). Ignore the file unless
-  `use-fzf-default-opts` is yes, as #505 does, and decide whether `~/.shell` should keep
-  `use-fzf-default-opts yes` or pass only the bindings it wants through `fzf-flags`. Conflicts in
-  `lib/-ftb-fzf` and `lib/ftb-tmux-popup`.
-  Done 2026-11-22 (1.3.0+nj.9): the file follows `use-fzf-default-opts`; with it, `--no-history`
-  and `--no-preview` (where no fzf-preview) on the command line. `~/.shell` keeps
-  `use-fzf-default-opts yes`, so fzfrc's colors and bindings stay.
-
-## Upstream fixes, other
-
-- [x] **`autoload ... --` registers a function named `--` (upstream #593, PR #598).** (p3) [bug]
-  `fzf-tab.zsh:440`. Not visible in this shell (no `--` function after loading), but the line is
-  wrong as written. Merges cleanly.
-  Done 2026-11-22 (1.3.0+nj.10): #598 cherry-picked.
-- [x] **`compadd -x` inserts the message as a match (upstream PR #592).** (p3) [bug] `zparseopts`
-  keeps `-x` in `$_mesg`, so `builtin compadd -x $_mesg` passes the option twice. Conflicts in
-  `lib/ftb-tmux-popup`.
-  Done 2026-11-22 (1.3.0+nj.11): quoted as `${_mesg[-x]}`; the PR's `$_mesg[2]` drops the message
-  (the existing WARN case caught it).
-- [ ] **Messages from `_message` and `compadd -x` disappear (upstream #604).** (p3) [bug] When the
-  widget returns 0 without candidates, zsh's message is wiped. No PR yet.
-- [x] **Group switching with identical group colors (upstream #581, PR #585).** (p3) [bug] The
-  switch filters by color, so two groups with the same color switch together. Conflicts in
-  `test/fzftab.ztst` only.
-  Done 2026-11-22 (1.3.0+nj.11): cherry-picked with its tests.
-- [x] **`$realpath` empty in execute bindings (upstream #575, PR #577).** (p3) [bug] Bindings like
-  `ctrl-e:become(nvim $realpath)` get nothing. Merges cleanly.
-  Done 2026-11-22 (1.3.0+nj.10): #577 cherry-picked.
-- [x] **External `sort -u` only with GNU sort (upstream #602, PR #595).** (p3) [bug] BSD sort
-  drops CJK-only differences; harmless on Linux, but the fix is small. Merges cleanly.
-  Done 2026-11-22 (1.3.0+nj.10): #595 cherry-picked.
-- [x] **`builtin cd` in the module build (upstream PR #594).** (p3) [bug] A `cd` function
-  (zoxide) breaks `build-fzf-tab-module`. Merges cleanly.
-  Done 2026-11-22 (1.3.0+nj.10): #594 cherry-picked.
-- [x] **Nested popup with `--tmux`/`--popup` in fzf's options (upstream #587, PR #588).** (p3)
-  [bug] Not in `fzfrc` today; matters once the popup is used with `use-fzf-default-opts`.
-  Conflicts in `.gitignore` and `lib/ftb-tmux-popup`.
-  Done 2026-11-22 (1.3.0+nj.11): `--no-tmux` when the defaults (variable or file) have one.
-- [ ] **Extra space before the completion with a right prompt (upstream #535).** (p3) [bug] Seen
-  with starship's left and right prompts; check with p10k's right prompt here before anything else.
-- [ ] **Continuous trigger on `pass` entries (upstream #367).** (p3) [test] `pass` paths are not
-  real directories (no realdir), so `/` is query input and space accepts; confirm that is what
-  `pass <Tab>` should do now that space continues.
-
-- [ ] **Temporary files left when a shell dies mid-completion.** (p3) [bug] `lib/-ftb-fzf`
-  removes `$tmp_dir/*.$$` after fzf returns, so a shell killed while fzf is open (a closed
-  terminal, a killed tmux server) leaves its `compcap`/`completions`/`groups`/`ftb_preview_init`
-  files in `${TMPPREFIX:-/tmp/zsh}-fzf-tab-$USER` (4 from 2026-11-14 there). Remove files of
-  PIDs that no longer exist when the directory is next used.
-
 ## Upstream overlap
 
 - [ ] **Upstream PRs duplicate the fork's popup features.** (p3) [chore] #543 (`popup-max-height`,
@@ -182,3 +90,96 @@ Take each as a cherry-pick with its test, run the suite, note the PR in CHANGELO
   `display-popup` arguments would cover the size and border options.
   Done 2026-11-22 (1.3.0+nj.4): `test/popup-tmux` plus three cases. The end-to-end one found
   that the popup ran by path in a separate zsh and ignored every popup zstyle (fixed).
+
+### Upstream fixes for this setup (completed 2026-11-22)
+- [x] **Tab inside a word does nothing with `complete_in_word` (upstream #603).** (p2) [bug]
+  `ls ab|x` with two matches never opens fzf, and Tab again repeats the no-op. `~/.shell` sets
+  `COMPLETE_IN_WORD`. Conflicts with master in `fzf-tab.zsh`.
+  Done 2026-11-22 (1.3.0+nj.8): #603's comparison and its test.
+- [x] **Case-insensitive matches insert one case-twin (upstream #589, PR #600).** (p2) [bug] With
+  `m:{a-z}={A-Z}` (in `~/.shell`'s `matcher-list`), `Foo` and `foo` both matching makes zsh report
+  one as unambiguous and fzf-tab inserts it without the picker. Conflicts in `fzf-tab.zsh`.
+  Done 2026-11-22 (1.3.0+nj.7): `-ftb-unambiguous-safe` combines #597, #576 and #600, with their tests.
+- [x] **Subsequence matchers bias toward one candidate (upstream #560, PR #576).** (p2) [bug]
+  `~/.shell`'s last `matcher-list` entries (`r:[[:ascii:]]||[[:ascii:]]=**`) produce a
+  `compstate[unambiguous]` that is not a substring of every candidate; fzf-tab inserts it instead
+  of showing the picker. Conflicts in `fzf-tab.zsh`; take it with #597 below, same code.
+  Done 2026-11-22 (1.3.0+nj.7): `-ftb-unambiguous-safe` combines #597, #576 and #600, with their tests.
+- [x] **The unambiguous fast path can rewrite the word destructively (upstream PR #597).** (p2)
+  [bug] Two guards on the fast path in `-ftb-complete` (unambiguous shorter than the word, or not
+  a prefix of it). Same block as #576 and #600: merge the three together.
+  Done 2026-11-22 (1.3.0+nj.7): `-ftb-unambiguous-safe` combines #597, #576 and #600, with their tests.
+- [x] **Carapace's pre-quoted words get a literal double backslash (upstream #503, PR #584).**
+  (p2) [bug] `path\\ file` lands on the command line for completions that come through carapace
+  (`~/.shell`'s zsh-complete caches carapace gap adapters). Merges cleanly. Related: #601, a
+  carapace file completion inside a directory starts with query `dir/` and shows 0/N (no PR).
+  Done 2026-11-22 (1.3.0+nj.5): #584 cherry-picked, plus a test (`-Q` words with a doubled
+  backslash). `~/.shell`'s carapace adapter ran its completer in a subshell and completed nothing
+  until 0.126.2, which is why this never showed here.
+- [x] **Carapace's common prefix still gets a double backslash.** (p2) [bug] With a partial
+  unquoted word (`dockerd --config-file my<Tab>`, files `my file.json` and `my other.json`), zsh
+  itself reports `compstate[unambiguous]` as `my\\ ` (carapace's doubly quoted words), and
+  fzf-tab's fast path inserts it; plain zsh inserts `my\ `. #584 only fixes the words fzf-tab
+  stores. Compare how plain zsh arrives at one backslash, then either fix the fast path's
+  unambiguous string the same way or skip the fast path for `-Q` words with `\\`. An empty word
+  works (both give `my\ `).
+  Done 2026-11-22 (1.3.0+nj.7): #597's check (the string must start a candidate) covers it, since
+  #584 stores the words with one backslash; test "carapace's doubly quoted words".
+- [x] **fzf reads `FZF_DEFAULT_OPTS_FILE` inside fzf-tab (upstream PR #505).** (p2) [bug] fzf-tab
+  clears `FZF_DEFAULT_OPTS` but fzf still reads the file, and `~/.config/fzf/fzfrc` sets
+  `--preview="fzf-preview {}"` (fzf-tab's `{}` is its NUL-separated line, not a path) and
+  `--history=...` (completion queries end up in fzf's search history). Ignore the file unless
+  `use-fzf-default-opts` is yes, as #505 does, and decide whether `~/.shell` should keep
+  `use-fzf-default-opts yes` or pass only the bindings it wants through `fzf-flags`. Conflicts in
+  `lib/-ftb-fzf` and `lib/ftb-tmux-popup`.
+  Done 2026-11-22 (1.3.0+nj.9): the file follows `use-fzf-default-opts`; with it, `--no-history`
+  and `--no-preview` (where no fzf-preview) on the command line. `~/.shell` keeps
+  `use-fzf-default-opts yes`, so fzfrc's colors and bindings stay.
+
+### Upstream fixes, other (completed 2026-11-22)
+- [x] **`autoload ... --` registers a function named `--` (upstream #593, PR #598).** (p3) [bug]
+  `fzf-tab.zsh:440`. Not visible in this shell (no `--` function after loading), but the line is
+  wrong as written. Merges cleanly.
+  Done 2026-11-22 (1.3.0+nj.10): #598 cherry-picked.
+- [x] **`compadd -x` inserts the message as a match (upstream PR #592).** (p3) [bug] `zparseopts`
+  keeps `-x` in `$_mesg`, so `builtin compadd -x $_mesg` passes the option twice. Conflicts in
+  `lib/ftb-tmux-popup`.
+  Done 2026-11-22 (1.3.0+nj.11): quoted as `${_mesg[-x]}`; the PR's `$_mesg[2]` drops the message
+  (the existing WARN case caught it).
+- [x] **Messages from `_message` and `compadd -x` disappear (upstream #604).** (p3) [bug] When the
+  widget returns 0 without candidates, zsh's message is wiped. No PR yet.
+  Done 2026-11-22 (1.3.0+nj.14): the issue's fix; no test of its own (it needs Tab bound to a
+  wrapper before fzf-tab loads, and this file loads fzf-tab once for all cases).
+- [x] **Group switching with identical group colors (upstream #581, PR #585).** (p3) [bug] The
+  switch filters by color, so two groups with the same color switch together. Conflicts in
+  `test/fzftab.ztst` only.
+  Done 2026-11-22 (1.3.0+nj.11): cherry-picked with its tests.
+- [x] **`$realpath` empty in execute bindings (upstream #575, PR #577).** (p3) [bug] Bindings like
+  `ctrl-e:become(nvim $realpath)` get nothing. Merges cleanly.
+  Done 2026-11-22 (1.3.0+nj.10): #577 cherry-picked.
+- [x] **External `sort -u` only with GNU sort (upstream #602, PR #595).** (p3) [bug] BSD sort
+  drops CJK-only differences; harmless on Linux, but the fix is small. Merges cleanly.
+  Done 2026-11-22 (1.3.0+nj.10): #595 cherry-picked.
+- [x] **`builtin cd` in the module build (upstream PR #594).** (p3) [bug] A `cd` function
+  (zoxide) breaks `build-fzf-tab-module`. Merges cleanly.
+  Done 2026-11-22 (1.3.0+nj.10): #594 cherry-picked.
+- [x] **Nested popup with `--tmux`/`--popup` in fzf's options (upstream #587, PR #588).** (p3)
+  [bug] Not in `fzfrc` today; matters once the popup is used with `use-fzf-default-opts`.
+  Conflicts in `.gitignore` and `lib/ftb-tmux-popup`.
+  Done 2026-11-22 (1.3.0+nj.11): `--no-tmux` when the defaults (variable or file) have one.
+- [x] **Extra space before the completion with a right prompt (upstream #535).** (p3) [bug] Seen
+  with starship's left and right prompts; check with p10k's right prompt here before anything else.
+  Not reproduced 2026-11-22: the report needs oh-my-zsh and starship's right prompt; dozens of
+  completions in tmux captures with p10k's right prompt today left the line in place.
+- [x] **Continuous trigger on `pass` entries (upstream #367).** (p3) [test] `pass` paths are not
+  real directories (no realdir), so `/` is query input and space accepts; confirm that is what
+  `pass <Tab>` should do now that space continues.
+  Checked 2026-11-22: `_pass` completes entries with `_values` (no realdir), so `/` stays query
+  input (narrow with `email/`) and space accepts the entry, which is what #367 asks for.
+
+- [x] **Temporary files left when a shell dies mid-completion.** (p3) [bug] `lib/-ftb-fzf`
+  removes `$tmp_dir/*.$$` after fzf returns, so a shell killed while fzf is open (a closed
+  terminal, a killed tmux server) leaves its `compcap`/`completions`/`groups`/`ftb_preview_init`
+  files in `${TMPPREFIX:-/tmp/zsh}-fzf-tab-$USER` (4 from 2026-11-14 there). Remove files of
+  PIDs that no longer exist when the directory is next used.
+  Done 2026-11-22 (1.3.0+nj.14): removed when the directory is next used; test.
