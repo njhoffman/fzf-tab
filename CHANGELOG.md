@@ -7,6 +7,17 @@ fork counter (`1.3.0+nj.N`, see CLAUDE.md).
 
 ## [Unreleased]
 
+## [1.3.0+nj.6] - 2026-11-22
+
+### Fixed
+
+- Upstream's changes to `fzf-tab.zsh` are back. The 1.3.0+nj.1 merge took the fork's whole file
+  where only a blank line conflicted, dropping what upstream had changed in it since 2023: the
+  `_approximate` fixes (#554, #568: corrections showed zsh's own menu), the SIGCHLD workaround
+  for zsh's non-reentrant pattern buffer, cygwin's `//` trigger (#531), the subshell-free
+  `-ftb-compadd` (#514) and the rest. Merged again three-way; only the fork's own changes differ
+  from upstream now.
+
 ## [1.3.0+nj.5] - 2026-11-22
 
 ### Fixed
@@ -77,7 +88,8 @@ merged with upstream's master at 24105b1 (v1.3.0 and 3 commits).
 
 ### Changed
 
-- Synced with upstream master (24105b1): the preview setup comes from upstream's
+- Synced with upstream master (24105b1), except `fzf-tab.zsh`, whose upstream changes were lost
+  in the merge (restored in 1.3.0+nj.6): the preview setup comes from upstream's
   `lib/-ftb-preview.tpl`, which still exports `word` as completion inserts it (quoted), as the fork
   did; group switching uses upstream's `active-group-style`; the `dd` query workaround is gone, as
   upstream removed it.
