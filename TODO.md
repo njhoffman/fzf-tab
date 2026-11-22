@@ -127,10 +127,11 @@ Take each as a cherry-pick with its test, run the suite, note the PR in CHANGELO
 
 ## Cleanup
 
-- [ ] **A custom `fzf-command` is ignored.** (p3) [bug] `lib/-ftb-fzf` replaces any
+- [x] **A custom `fzf-command` is ignored.** (p3) [bug] `lib/-ftb-fzf` replaces any
   `fzf-command` other than `ftb-tmux-popup` with `ftb-fzf` (`$commands[fzf]`), so upstream's
   `zstyle ':fzf-tab:*' fzf-command sk` (or an fzf with flags) no longer works. Run the configured
   command, and fall back to `ftb-fzf` only for the default.
+  Done 2026-11-22 (1.3.0+nj.12): only `fzf` becomes `ftb-fzf`; test with a stub command.
 - [x] **Debug log path.** (p3) [bug] `__LOGDIR='/tmp/fzf-tab/'` makes the trace file
   `/tmp/fzf-tab/-PID-fzf-tab-N.log` (a leading dash, a directory that may not exist); upstream used
   `${TMPPREFIX:-/tmp/zsh}-PID-fzf-tab-N.log`. Pick one and create the directory.

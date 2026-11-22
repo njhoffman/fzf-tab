@@ -69,7 +69,10 @@ local use_tmux_popup=0
 if [[ $fzf_command == "ftb-tmux-popup" ]]; then
   use_tmux_popup=1
 else
-  fzf_command="ftb-fzf"
+  # The default goes through ftb-fzf, which runs the fzf binary ($commands[fzf])
+  # past any fzf function or alias; another fzf-command (sk, fzf with flags)
+  # runs as configured
+  [[ $fzf_command == fzf ]] && fzf_command=ftb-fzf
   # fzf will cause the current line to refresh, so move the cursor down.
   echoti cud1 >/dev/tty
   # reset cursor before call fzf

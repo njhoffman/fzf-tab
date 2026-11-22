@@ -565,6 +565,16 @@
       [[ $switched[2] == $'\e[0m·beta\0beta\0' ]]
   }
 0:group switching preserves an ungrouped reset-colored list
+  comptesteval "stubfzf() { print -r -- called \$# > $PWD/stubfzf.log }; zstyle -d ':fzf-tab:*' debug-command; zstyle ':fzf-tab:*' fzf-command stubfzf"
+  comptesteval '_tst() { compadd alpha beta }'
+  comptest $'tst \t'
+  comptesteval "zstyle -d ':fzf-tab:*' fzf-command; zstyle ':fzf-tab:*' debug-command $ZTST_srcdir/select -n 1 -h '\$#_ftb_headers' -q '\"\$_ftb_query\"'"
+  [[ -s stubfzf.log ]] && print stub-ran
+  rm -f stubfzf.log
+0:a custom fzf-command runs as configured (not replaced by ftb-fzf)
+>line: {tst }{}
+>stub-ran
+
 %clean
 
   zmodload -ui zsh/zpty

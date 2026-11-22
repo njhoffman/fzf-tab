@@ -7,6 +7,14 @@ fork counter (`1.3.0+nj.N`, see CLAUDE.md).
 
 ## [Unreleased]
 
+## [1.3.0+nj.12] - 2026-11-22
+
+### Fixed
+
+- `fzf-command` other than `fzf` and `ftb-tmux-popup` (`sk`, an fzf with flags) runs as
+  configured again; since 2025-08 the fork replaced every one with `ftb-fzf`, which runs
+  `$commands[fzf]`. The default `fzf` still goes through `ftb-fzf`.
+
 ## [1.3.0+nj.11] - 2026-11-22
 
 ### Fixed
