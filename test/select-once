@@ -1,0 +1,12 @@
+#!/usr/bin/env zsh
+# select-once STATE KEY ARGS...: test/select, with expect key KEY on the first
+# call only (STATE is a file recording the calls), so continuous completion
+# runs one round, then stops
+local state=$1 key=$2
+shift 2
+if [[ -e $state ]]; then
+  print x >> $state
+  exec ${0:h}/select "$@"
+fi
+print x > $state
+exec ${0:h}/select -e "$key" "$@"

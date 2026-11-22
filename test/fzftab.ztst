@@ -248,6 +248,52 @@
 >C1:{package }
 >C1:{openpgp-keys-gentoo-release}
 >C1:{-MERGING-pnpm-bin}
+
+  rm -f $ZTST_srcdir/once.state
+  comptesteval '_tst() { if (( CURRENT == 2 )); then compadd alpha beta; else compadd xray yankee; fi }'
+  comptesteval "zstyle ':fzf-tab:*' continuous-trigger / ' '"
+  comptesteval "zstyle ':fzf-tab:*' debug-command $ZTST_srcdir/select-once $ZTST_srcdir/once.state ' ' -n 1 -h '\$#_ftb_headers' -q '\"\$_ftb_query\"'"
+  comptest $'tst \t'
+0:space continues with the next argument
+>line: {tst }{}
+>QUERY:{}
+>C0:{alpha}
+>C0:{beta}
+>line: {tst alpha xray }{}
+>QUERY:{}
+>C0:{xray}
+>C0:{yankee}
+
+  rm -f $ZTST_srcdir/once.state
+  comptest $': \t'
+0:space after a directory moves on to the next argument
+>line: {: }{}
+>QUERY:{}
+>DESCRIPTION:{file}
+>C1:{dir1/}
+>C1:{dir2/}
+>C1:{file1}
+>C1:{file2}
+>line: {: dir1/ dir1/}{}
+>QUERY:{}
+>DESCRIPTION:{file}
+>C1:{dir1/}
+>C1:{dir2/}
+>C1:{file1}
+>C1:{file2}
+
+  rm -f $ZTST_srcdir/once.state
+  comptesteval '_tst() { if (( CURRENT == 2 )); then compadd alpha beta; else compadd only; fi }'
+  comptest $'tst \t'
+  comptesteval "zstyle ':fzf-tab:*' debug-command $ZTST_srcdir/select -n 1 -h '\$#_ftb_headers' -q '\"\$_ftb_query\"'"
+  comptesteval "zstyle -d ':fzf-tab:*' continuous-trigger"
+  rm -f $ZTST_srcdir/once.state
+0:after a space, a lone next candidate is left alone
+>line: {tst }{}
+>QUERY:{}
+>C0:{alpha}
+>C0:{beta}
+>line: {tst alpha }{}
 %clean
 
   zmodload -ui zsh/zpty

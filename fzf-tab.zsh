@@ -105,7 +105,8 @@ builtin unalias -m '[^+]*'
 
 -ftb-complete() {
   local -Ua _ftb_groups
-  local choice choices _ftb_curcontext continuous_trigger print_query accept_line bs=$'\2' nul=$'\0'
+  local choice choices _ftb_curcontext print_query accept_line bs=$'\2' nul=$'\0'
+  local -a continuous_triggers
   local ret=0
 
   # must run with user options; don't move `emulate -L zsh` above this line
@@ -118,16 +119,29 @@ builtin unalias -m '[^+]*'
   local _ftb_query _ftb_complist=() _ftb_headers=() command opts
   -ftb-generate-complist # sets `_ftb_complist`
 
-  -ftb-zstyle -s continuous-trigger continuous_trigger || {
-    [[ $OSTYPE == msys ]] && continuous_trigger=// || continuous_trigger=/
+  # One key or several: any of them accepts the selection and completes again.
+  # A space continues with the next argument (see fzf-tab-complete).
+  -ftb-zstyle -a continuous-trigger continuous_triggers || {
+    [[ $OSTYPE == msys ]] && continuous_triggers=(//) || continuous_triggers=(/)
   }
 
   case $#_ftb_complist in
     0) return 1;;
     1)
+      # After a space, a lone next argument is left for the user to pick:
+      # completion stops with the cursor after the space (inserting it would
+      # add an argument nobody chose, and continuing could loop on commands
+      # that always offer one word).
+      if (( _ftb_continue_last )) && [[ $_ftb_continue_key == ' ' ]]; then
+        compstate[list]=
+        compstate[insert]=
+        _ftb_finish=1
+        return 0
+      fi
       choices=("EXPECT_KEY" "${_ftb_compcap[1]%$bs*}")
+      # continue through a lone candidate, such as a directory's only entry
       if (( _ftb_continue_last )); then
-        choices[1]=$continuous_trigger
+        choices[1]=${_ftb_continue_key:-$continuous_triggers[1]}
       fi
       ;;
     *)
@@ -176,9 +190,10 @@ builtin unalias -m '[^+]*'
       ;;
   esac
 
-  if [[ -n $choices[1] && $choices[1] == $continuous_trigger ]]; then
+  if [[ -n $choices[1] ]] && (( ${continuous_triggers[(Ie)$choices[1]]} )); then
     typeset -gi _ftb_continue=1
     typeset -gi _ftb_continue_last=1
+    typeset -g _ftb_continue_key=$choices[1]
   fi
 
   if [[ -n $choices[1] && $choices[1] == $accept_line ]]; then
@@ -242,6 +257,7 @@ fzf-tab-debug() {
 fzf-tab-complete() {
   # this name must be ugly to avoid clashes
   local -i _ftb_continue=1 _ftb_continue_last=0 _ftb_accept=0 ret=0
+  local _ftb_continue_key=
   # hide the cursor until finishing completion, so that users won't see cursor up and down
   # NOTE: MacOS Terminal doesn't support civis & cnorm
   echoti civis >/dev/tty 2>/dev/null
@@ -258,6 +274,10 @@ fzf-tab-complete() {
       IN_FZF_TAB=0
     }
     if (( _ftb_continue )); then
+      # A space accepts the selection as an argument: after a directory (which
+      # zsh leaves as `dir/` to go on into), move on to the next argument.
+      # Other suffixes stay zsh's: a space after a word, none after `--opt=`.
+      [[ $_ftb_continue_key == ' ' && $LBUFFER == */ ]] && LBUFFER+=' '
       zle .split-undo
       zle .reset-prompt
       zle -R

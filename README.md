@@ -89,7 +89,7 @@ Available keybindings:
 
 - <kbd>F1</kbd>/<kbd>F2</kbd>: switch between groups, can be configured by `switch-group` tag
 
-- <kbd>/</kbd>: trigger continuous completion (useful when completing a deep path), can be configured by `continuous-trigger` tag
+- <kbd>/</kbd>: trigger continuous completion (useful when completing a deep path), can be configured by `continuous-trigger` tag (one key or several; a space accepts the selection as an argument and completes the next one)
 
 Available commands:
 

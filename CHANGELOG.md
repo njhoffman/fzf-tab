@@ -7,6 +7,16 @@ fork counter (`1.3.0+nj.N`, see CLAUDE.md).
 
 ## [Unreleased]
 
+## [1.3.0+nj.2] - 2026-11-22
+
+### Added
+
+- `continuous-trigger` takes several keys (`zstyle ':fzf-tab:*' continuous-trigger / ' '`): fzf
+  expects them all, and any one accepts the selection and completes again. A space accepts it as
+  an argument and completes the next one: after a directory (`dir/`) it adds the space instead of
+  going into the directory, which `/` still does. After a space, a next argument with a single
+  candidate is not inserted: completion stops with the cursor after the space.
+
 ## [1.3.0+nj.1] - 2026-11-22
 
 The fork's first versioned release: its changes since it branched (upstream 6aced3f, 2023),
