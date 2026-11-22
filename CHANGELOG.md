@@ -7,6 +7,24 @@ fork counter (`1.3.0+nj.N`, see CLAUDE.md).
 
 ## [Unreleased]
 
+## [1.3.0+nj.10] - 2026-11-22
+
+### Fixed
+
+Upstream fixes, cherry-picked:
+
+- `$realpath` and `$word` reach execute bindings, and fzf-tab's own `lib/` comes first in `fpath`,
+  so another fzf-tab copy's helpers are never autoloaded instead (PR #577).
+- Loading no longer registers an autoload stub named `--` (#593, PR #598).
+- The external `sort -u` fast path is used only with GNU sort; BSD sort dropped candidates that
+  differ only in CJK characters (#602, PR #595).
+- `build-fzf-tab-module` uses `builtin cd`, so a `cd` function (zoxide) cannot break it (PR #594).
+
+### Added
+
+- A test that runs a preview as fzf does (`{f}` a file of the row) and checks `$word` and
+  `$realpath`; the tmux stub now keeps the rows and fzf-tab's temporary files for it.
+
 ## [1.3.0+nj.9] - 2026-11-22
 
 ### Fixed

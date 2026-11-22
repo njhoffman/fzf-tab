@@ -396,11 +396,26 @@
   local log=$(<popup.log)
   [[ $log == *"FZF_DEFAULT_OPTS_FILE=$PWD/fzfrc"* || $log == *"FZF_DEFAULT_OPTS_FILE='$PWD/fzfrc'"* ]] && print defaults-file-kept
   [[ $log == *"'--no-history'"* ]] && print history-still-off
-  rm -rf popup-bin popup.log
 0:use-fzf-default-opts keeps fzf's defaults file; --history and --preview stay off
 >line: {tst }{}
 >defaults-file-kept
 >history-still-off
+
+  comptesteval "export POPUP_LOG=$PWD/popup.log POPUP_SCREEN='0 10 0 5 40 120 on bottom' TMUX_PANE=%1 PATH=$PWD/popup-bin:\$PATH"
+  comptesteval "zstyle -d ':fzf-tab:*' debug-command; zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup; zstyle ':fzf-tab:complete:*' fzf-preview 'print -r -- \"word=\$word realpath=\$realpath\"'"
+  comptest $': di\t'
+  comptesteval "zstyle -d ':fzf-tab:*' fzf-command; zstyle -d ':fzf-tab:complete:*' fzf-preview; unset TMUX_PANE"
+  comptesteval "zstyle ':fzf-tab:*' debug-command $ZTST_srcdir/select -n 1 -h '\$#_ftb_headers' -q '\"\$_ftb_query\"'"
+  local -a fzfargs=(${(Q)${(z)"$(<popup.log)"}})
+  local preview=${${(M)fzfargs:#--preview=*}[1]#--preview=}
+  # a row is colors, then the word and its suffix as NUL-separated fields
+  grep -a 'dir1' popup.log.rows | head -1 > row
+  preview=${preview//${TMPPREFIX:-\/tmp\/zsh}-fzf-tab-$USER/$PWD/popup.log.tmp}
+  SHELL=zsh zsh -fc "${preview//\{f\}/$PWD/row}" 2>&1
+  rm -rf popup-bin popup.log popup.log.rows popup.log.tmp row
+0:the preview gets $word and $realpath of the candidate (fzf runs it with {f} as a file of the row)
+>line: {: di}{}
+>word=dir1 realpath=dir1
 
 
   comptesteval $'_tst() { local -a d=(\'alpha one\' \'beta two\'); compadd -Q -d d -- \'alpha\\\\ one\' \'beta\\\\ two\' }'

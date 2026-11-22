@@ -2,7 +2,9 @@
 # popup-tmux: a stub tmux for ftb-tmux-popup tests. display-message prints
 # $POPUP_SCREEN (pane_top cursor_y pane_left cursor_x window_height
 # window_width status status-position); popup writes its arguments, then the
-# fzf command file it was given (-E ". FILE", the last argument), to $POPUP_LOG
+# fzf command file it was given (-E ". FILE", the last argument), to $POPUP_LOG,
+# and copies the completion rows that file reads to $POPUP_LOG.rows and
+# fzf-tab's temporary directory to $POPUP_LOG.tmp
 case $1 in
   display-message) echo "$POPUP_SCREEN" ;;
   popup)
@@ -10,5 +12,10 @@ case $1 in
     echo "popup $*" >"$POPUP_LOG"
     for a; do last=$a; done
     cat "${last#. }" >>"$POPUP_LOG"
+    # the rows fzf would show, for tests that run its preview
+    rows=$(sed -n 's/.* < \([^ ]*\) > .*/\1/p' "${last#. }")
+    [ -n "$rows" ] && cp "$rows" "$POPUP_LOG.rows"
+    # and fzf-tab's files the preview reads (gone once completion ends)
+    [ -n "$rows" ] && rm -rf "$POPUP_LOG.tmp" && cp -r "$(dirname "$rows")" "$POPUP_LOG.tmp"
     ;;
 esac

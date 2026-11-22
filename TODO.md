@@ -59,9 +59,10 @@ Take each as a cherry-pick with its test, run the suite, note the PR in CHANGELO
 
 ## Upstream fixes, other
 
-- [ ] **`autoload ... --` registers a function named `--` (upstream #593, PR #598).** (p3) [bug]
+- [x] **`autoload ... --` registers a function named `--` (upstream #593, PR #598).** (p3) [bug]
   `fzf-tab.zsh:440`. Not visible in this shell (no `--` function after loading), but the line is
   wrong as written. Merges cleanly.
+  Done 2026-11-22 (1.3.0+nj.10): #598 cherry-picked.
 - [ ] **`compadd -x` inserts the message as a match (upstream PR #592).** (p3) [bug] `zparseopts`
   keeps `-x` in `$_mesg`, so `builtin compadd -x $_mesg` passes the option twice. Conflicts in
   `lib/ftb-tmux-popup`.
@@ -70,12 +71,15 @@ Take each as a cherry-pick with its test, run the suite, note the PR in CHANGELO
 - [ ] **Group switching with identical group colors (upstream #581, PR #585).** (p3) [bug] The
   switch filters by color, so two groups with the same color switch together. Conflicts in
   `test/fzftab.ztst` only.
-- [ ] **`$realpath` empty in execute bindings (upstream #575, PR #577).** (p3) [bug] Bindings like
+- [x] **`$realpath` empty in execute bindings (upstream #575, PR #577).** (p3) [bug] Bindings like
   `ctrl-e:become(nvim $realpath)` get nothing. Merges cleanly.
-- [ ] **External `sort -u` only with GNU sort (upstream #602, PR #595).** (p3) [bug] BSD sort
+  Done 2026-11-22 (1.3.0+nj.10): #577 cherry-picked.
+- [x] **External `sort -u` only with GNU sort (upstream #602, PR #595).** (p3) [bug] BSD sort
   drops CJK-only differences; harmless on Linux, but the fix is small. Merges cleanly.
-- [ ] **`builtin cd` in the module build (upstream PR #594).** (p3) [bug] A `cd` function
+  Done 2026-11-22 (1.3.0+nj.10): #595 cherry-picked.
+- [x] **`builtin cd` in the module build (upstream PR #594).** (p3) [bug] A `cd` function
   (zoxide) breaks `build-fzf-tab-module`. Merges cleanly.
+  Done 2026-11-22 (1.3.0+nj.10): #594 cherry-picked.
 - [ ] **Nested popup with `--tmux`/`--popup` in fzf's options (upstream #587, PR #588).** (p3)
   [bug] Not in `fzfrc` today; matters once the popup is used with `use-fzf-default-opts`.
   Conflicts in `.gitignore` and `lib/ftb-tmux-popup`.
@@ -84,6 +88,12 @@ Take each as a cherry-pick with its test, run the suite, note the PR in CHANGELO
 - [ ] **Continuous trigger on `pass` entries (upstream #367).** (p3) [test] `pass` paths are not
   real directories (no realdir), so `/` is query input and space accepts; confirm that is what
   `pass <Tab>` should do now that space continues.
+
+- [ ] **Temporary files left when a shell dies mid-completion.** (p3) [bug] `lib/-ftb-fzf`
+  removes `$tmp_dir/*.$$` after fzf returns, so a shell killed while fzf is open (a closed
+  terminal, a killed tmux server) leaves its `compcap`/`completions`/`groups`/`ftb_preview_init`
+  files in `${TMPPREFIX:-/tmp/zsh}-fzf-tab-$USER` (4 from 2026-11-14 there). Remove files of
+  PIDs that no longer exist when the directory is next used.
 
 ## Upstream overlap
 
