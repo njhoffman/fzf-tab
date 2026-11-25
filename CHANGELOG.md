@@ -7,6 +7,15 @@ fork counter (`1.3.0+nj.N`, see CLAUDE.md).
 
 ## [Unreleased]
 
+## [1.3.0+nj.16] - 2026-11-25
+
+### Fixed
+
+- With the C module loaded, carapace's doubly quoted words are inserted with one backslash too:
+  1.3.0+nj.5's fix (upstream PR #584) ran in the zsh loop that the module's
+  `fzf-tab-compcap-generate` replaces, so it never applied there. The words are cleaned before
+  either path stores them; the suite passes with and without the module.
+
 ## [1.3.0+nj.15] - 2026-11-22
 
 ### Removed

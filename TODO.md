@@ -30,11 +30,14 @@ Scanned 2026-11-22: upstream's 88 open issues and 27 open PRs (the fork has issu
   Ubuntu and Arch, with and without the binary module.
   2026-11-22: enabled in the Actions tab (Linux, macOS and Zsh workflows active); tick after the
   first run on a push to master.
-- [ ] **Build the binary module on the hosts.** (p3) [perf] `FZF_TAB_MODULE_VERSION` is unset
+- [x] **Build the binary module on the hosts.** (p3) [perf] `FZF_TAB_MODULE_VERSION` is unset
   here, so list-colors go through the pure-zsh zsh-ls-colors. `build-fzf-tab-module` builds
   0.2.2 from the fork's (reformatted) source and the suite passes with it (checked 2026-11-22 in a
   scratch worktree). Have zinit build it (`atclone`/`atpull'build-fzf-tab-module'` on the plugin
   in `~/.shell`'s `widgets.zsh`), so new hosts get it too; it clones zsh's source (network).
+  Done 2026-11-25: `~/.shell` 0.131.0 builds it on zinit clone and update (`atclone`/`atpull`);
+  built on charon by hand (its plugin directory is this checkout). Building it found the gap
+  fixed in 1.3.0+nj.16.
 
 ## Cleanup
 

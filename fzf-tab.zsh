@@ -108,6 +108,10 @@ builtin unalias -m '[^+]*'
   _opts+=("${(@kv)apre}" "${(@kv)hpre}" $isfile)
   __tmp_value+=$'\0args\0'${(pj:\1:)_opts}
 
+  # Strip carapace double-backslash quoting when original compadd used -Q
+  # (upstream PR #584), before either path below stores the words: the C
+  # module's fzf-tab-compcap-generate never runs the zsh loop
+  (( ${_opts[(I)-Q]} )) && __hits=("${(@)__hits//\\\\/\\}")
   if (( $+builtins[fzf-tab-compcap-generate] )); then
     fzf-tab-compcap-generate __hits __dscr __tmp_value
   else
@@ -116,8 +120,6 @@ builtin unalias -m '[^+]*'
     local dscr word i
     for i in {1..$#__hits}; do
       word=$__hits[i] dscr=$__dscr[i]
-      # Strip carapace double-backslash quoting when original compadd used -Q
-      (( ${_opts[(I)-Q]} )) && word=${word//\\\\/\\}
       if [[ -n $dscr ]]; then
         dscr=${dscr//$'\n'}
       elif [[ -n $word ]]; then
