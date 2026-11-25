@@ -22,49 +22,6 @@ Scanned 2026-11-22: upstream's 88 open issues and 27 open PRs (the fork has issu
   take upstream's versions in the next sync and drop the fork's copies. #582 adds `reverse` to
   `active-group-style` next to the fork's `italic`/`bold,italic`: align the token lists.
 
-## CI and build
-
-- [ ] **CI has never run on the fork.** (p2) [test] Actions is enabled for `njhoffman/fzf-tab`,
-  but no workflow run exists: GitHub holds workflows on forks until they are enabled in the
-  repository's Actions tab (a one-time click; needs the web UI). The workflows run the suite on
-  Ubuntu and Arch, with and without the binary module.
-  2026-11-22: enabled in the Actions tab (Linux, macOS and Zsh workflows active); tick after the
-  first run on a push to master.
-- [x] **Build the binary module on the hosts.** (p3) [perf] `FZF_TAB_MODULE_VERSION` is unset
-  here, so list-colors go through the pure-zsh zsh-ls-colors. `build-fzf-tab-module` builds
-  0.2.2 from the fork's (reformatted) source and the suite passes with it (checked 2026-11-22 in a
-  scratch worktree). Have zinit build it (`atclone`/`atpull'build-fzf-tab-module'` on the plugin
-  in `~/.shell`'s `widgets.zsh`), so new hosts get it too; it clones zsh's source (network).
-  Done 2026-11-25: `~/.shell` 0.131.0 builds it on zinit clone and update (`atclone`/`atpull`);
-  built on charon by hand (its plugin directory is this checkout). Building it found the gap
-  fixed in 1.3.0+nj.16.
-
-## Cleanup
-
-- [x] **A custom `fzf-command` is ignored.** (p3) [bug] `lib/-ftb-fzf` replaces any
-  `fzf-command` other than `ftb-tmux-popup` with `ftb-fzf` (`$commands[fzf]`), so upstream's
-  `zstyle ':fzf-tab:*' fzf-command sk` (or an fzf with flags) no longer works. Run the configured
-  command, and fall back to `ftb-fzf` only for the default.
-  Done 2026-11-22 (1.3.0+nj.12): only `fzf` becomes `ftb-fzf`; test with a stub command.
-- [x] **Debug log path.** (p3) [bug] `__LOGDIR='/tmp/fzf-tab/'` makes the trace file
-  `/tmp/fzf-tab/-PID-fzf-tab-N.log` (a leading dash, a directory that may not exist); upstream used
-  `${TMPPREFIX:-/tmp/zsh}-PID-fzf-tab-N.log`. Pick one and create the directory.
-  Done 2026-11-22 (1.3.0+nj.4): `${TMPPREFIX:-/tmp/zsh}-fzf-tab-$USER/debug-PID-N.log`, the
-  directory created with mode 700.
-- [x] **Unfinished stubs and TODO comments.** (p3) [refactor] `fzf-tab-complete-popup() { }` is an
-  empty widget ("if TMUX available force popup"); `__util_log` is half commented out; the
-  `# __log_*` call sites in `lib/ftb-tmux-popup` and `fzf-tab.zsh` do nothing. Finish or remove.
-  Done 2026-11-22 (1.3.0+nj.15): removed (`util.zsh`, the stub widget, the dead log calls);
-  upstream's own TODO comments stay.
-- [x] **Generated `README` man page.** (p3) [docs] zinit's z-a-man writes `README` (ronn output,
-  September 2023) next to `README.md`; it is stale. Stop committing it (`.gitignore`) or
-  regenerate it with each release.
-  Done 2026-11-22 (1.3.0+nj.4): untracked and ignored; z-a-man still writes it locally.
-- [x] **Document the fork's zstyles in README.md.** (p3) [docs] The popup options,
-  `use-fzf-default-opts`, `fzf-tmux-width-factor` and the multi-key `continuous-trigger` are only
-  in the code and CHANGELOG.md.
-  Done 2026-11-22 (1.3.0+nj.4): README.md "Fork additions".
-
 ## Completed
 
 ### Loading (completed 2026-11-22)
@@ -191,3 +148,46 @@ Scanned 2026-11-22: upstream's 88 open issues and 27 open PRs (the fork has issu
   files in `${TMPPREFIX:-/tmp/zsh}-fzf-tab-$USER` (4 from 2026-11-14 there). Remove files of
   PIDs that no longer exist when the directory is next used.
   Done 2026-11-22 (1.3.0+nj.14): removed when the directory is next used; test.
+
+### CI and build (completed 2026-11-25)
+- [x] **CI has never run on the fork.** (p2) [test] Actions is enabled for `njhoffman/fzf-tab`,
+  but no workflow run exists: GitHub holds workflows on forks until they are enabled in the
+  repository's Actions tab (a one-time click; needs the web UI). The workflows run the suite on
+  Ubuntu and Arch, with and without the binary module.
+  2026-11-22: enabled in the Actions tab (Linux, macOS and Zsh workflows active); tick after the
+  first run on a push to master.
+  Done 2026-11-25: the fork consent in the Actions tab; first runs on 1.3.0+nj.16 (f1c1950):
+  Linux, Zsh and macOS all passed, with and without the C module.
+- [x] **Build the binary module on the hosts.** (p3) [perf] `FZF_TAB_MODULE_VERSION` is unset
+  here, so list-colors go through the pure-zsh zsh-ls-colors. `build-fzf-tab-module` builds
+  0.2.2 from the fork's (reformatted) source and the suite passes with it (checked 2026-11-22 in a
+  scratch worktree). Have zinit build it (`atclone`/`atpull'build-fzf-tab-module'` on the plugin
+  in `~/.shell`'s `widgets.zsh`), so new hosts get it too; it clones zsh's source (network).
+  Done 2026-11-25: `~/.shell` 0.131.0 builds it on zinit clone and update (`atclone`/`atpull`);
+  built on charon by hand (its plugin directory is this checkout). Building it found the gap
+  fixed in 1.3.0+nj.16.
+
+### Cleanup (completed 2026-11-25)
+- [x] **A custom `fzf-command` is ignored.** (p3) [bug] `lib/-ftb-fzf` replaces any
+  `fzf-command` other than `ftb-tmux-popup` with `ftb-fzf` (`$commands[fzf]`), so upstream's
+  `zstyle ':fzf-tab:*' fzf-command sk` (or an fzf with flags) no longer works. Run the configured
+  command, and fall back to `ftb-fzf` only for the default.
+  Done 2026-11-22 (1.3.0+nj.12): only `fzf` becomes `ftb-fzf`; test with a stub command.
+- [x] **Debug log path.** (p3) [bug] `__LOGDIR='/tmp/fzf-tab/'` makes the trace file
+  `/tmp/fzf-tab/-PID-fzf-tab-N.log` (a leading dash, a directory that may not exist); upstream used
+  `${TMPPREFIX:-/tmp/zsh}-PID-fzf-tab-N.log`. Pick one and create the directory.
+  Done 2026-11-22 (1.3.0+nj.4): `${TMPPREFIX:-/tmp/zsh}-fzf-tab-$USER/debug-PID-N.log`, the
+  directory created with mode 700.
+- [x] **Unfinished stubs and TODO comments.** (p3) [refactor] `fzf-tab-complete-popup() { }` is an
+  empty widget ("if TMUX available force popup"); `__util_log` is half commented out; the
+  `# __log_*` call sites in `lib/ftb-tmux-popup` and `fzf-tab.zsh` do nothing. Finish or remove.
+  Done 2026-11-22 (1.3.0+nj.15): removed (`util.zsh`, the stub widget, the dead log calls);
+  upstream's own TODO comments stay.
+- [x] **Generated `README` man page.** (p3) [docs] zinit's z-a-man writes `README` (ronn output,
+  September 2023) next to `README.md`; it is stale. Stop committing it (`.gitignore`) or
+  regenerate it with each release.
+  Done 2026-11-22 (1.3.0+nj.4): untracked and ignored; z-a-man still writes it locally.
+- [x] **Document the fork's zstyles in README.md.** (p3) [docs] The popup options,
+  `use-fzf-default-opts`, `fzf-tmux-width-factor` and the multi-key `continuous-trigger` are only
+  in the code and CHANGELOG.md.
+  Done 2026-11-22 (1.3.0+nj.4): README.md "Fork additions".
