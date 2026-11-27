@@ -30,15 +30,8 @@ Scanned 2026-11-22: upstream's 88 open issues and 27 open PRs (the fork has issu
   take upstream's versions in the next sync and drop the fork's copies. #582 adds `reverse` to
   `active-group-style` next to the fork's `italic`/`bold,italic`: align the token lists.
 
-## CI
+## Tests
 
-- [ ] **macOS CI fails the "case-insensitive twins" test.** (p2) [test] The first macOS test run
-  (2026-11-26, run 45948195066, after nj.19 turned the steps on) fails `test/fzftab.ztst`'s
-  "case-insensitive twins open the picker": macOS's default filesystem ignores case, so
-  `touch xaaa Xaaa` makes one file, zsh completes it directly (`: xaaa `) and no picker opens.
-  A filesystem difference, not a fzf-tab bug; Linux and every zsh version pass. Make the
-  candidates with `compadd xaaa Xaaa` in a `_tst` (as the other matcher tests do) so the test
-  does not depend on the filesystem, then see whether macOS passes the rest of the suite.
 - [ ] **No test isolates the case-twins guard (upstream #600).** (p3) [test] With the
   `${(L)word} == ${(L)unamb}` check in `-ftb-unambiguous-safe` disabled, the whole suite still
   passes (checked 2026-11-27, with the file-based twins test and the compadd one alike): another
@@ -307,3 +300,15 @@ Scanned 2026-11-22: upstream's 88 open issues and 27 open PRs (the fork has issu
   must be called by name), `FZF_BIN=${}` is unused, and `zstyle ':fzf-tab:*' multi-group` is read
   by neither the fork nor upstream. The change belongs in `~/.shell`.
   Done 2026-11-26 (`~/.shell` 0.138.7): the three entries are gone.
+
+### CI (completed 2026-11-27)
+
+- [x] **macOS CI fails the "case-insensitive twins" test.** (p2) [test] The first macOS test run
+  (2026-11-26, run 45948195066, after nj.19 turned the steps on) fails `test/fzftab.ztst`'s
+  "case-insensitive twins open the picker": macOS's default filesystem ignores case, so
+  `touch xaaa Xaaa` makes one file, zsh completes it directly (`: xaaa `) and no picker opens.
+  A filesystem difference, not a fzf-tab bug; Linux and every zsh version pass. Make the
+  candidates with `compadd xaaa Xaaa` in a `_tst` (as the other matcher tests do) so the test
+  does not depend on the filesystem, then see whether macOS passes the rest of the suite.
+  Done 2026-11-27: candidates from compadd through `_description` (matcher-list needs its
+  options); all three workflows pass, macOS with and without the module (run 45949398264).
