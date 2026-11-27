@@ -25,11 +25,16 @@ else
   done
 fi
 
-# calculate and persist current group index
-# the index starts from 2, because switching from "all" to "group 1" looks weird
-local current=2
+# calculate and persist current group index. Until a group is selected every
+# group's rows show, so the first switch goes to an end: the next key to the
+# first group, the previous key to the last (upstream started both at group 2)
+local current
 if (( $#group_ids > 0 )) && [[ -f $tmp_dir/current-group.$pid ]]; then
   current=$(( $(<$tmp_dir/current-group.$pid) + offset ))
+elif (( offset < 0 )); then
+  current=$#group_ids
+else
+  current=1
 fi
 (( current > $#group_ids )) && current=1
 (( current == 0 )) && current=$#group_ids

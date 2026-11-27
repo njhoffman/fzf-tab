@@ -604,7 +604,7 @@
       > $tmp_dir/completions.$pid
     print -rl -- 'group one' 'group two' > $tmp_dir/groups.$pid
     local -a switched=("${(@f)$(
-      $commands[zsh] -f $ZTST_srcdir/../lib/ftb-switch-group $pid 1 bold $tmp_dir 0
+      $commands[zsh] -f $ZTST_srcdir/../lib/ftb-switch-group $pid 1 bold $tmp_dir -1
     )}")
     (( $#switched == 2 )) &&
       [[ $switched[1] == $'\e[0mgroup one  \e[00m\e[0m\e[22;1mgroup two\e[22m\e[00m' ]] &&
@@ -626,7 +626,7 @@
     # as -ftb-fzf passes them: valid tokens, sorted, comma-joined
     for style in italic,reverse bold,italic,reverse,underline bold,none; do
       rm -f $tmp_dir/current-group.$pid
-      print -r -- "$style ${(q+)${(f)"$($commands[zsh] -f $ZTST_srcdir/../lib/ftb-switch-group $pid 1 $style $tmp_dir 0)"}[1]}"
+      print -r -- "$style ${(q+)${(f)"$($commands[zsh] -f $ZTST_srcdir/../lib/ftb-switch-group $pid 1 $style $tmp_dir -1)"}[1]}"
     done
   }
 0:active-group-style combines any styles, reverse among them; none wins (upstream PR #582)
@@ -646,7 +646,7 @@
       2${bs}$'\e[0m·beta\0beta\0' \
       > $tmp_dir/completions.$pid
     print -rl -- '[ab]' '[abcdef]' > $tmp_dir/groups.$pid
-    print -r -- ${(q+)${(f)"$($commands[zsh] -f $ZTST_srcdir/../lib/ftb-switch-group $pid 1 bold,underline $tmp_dir 0)"}[1]}
+    print -r -- ${(q+)${(f)"$($commands[zsh] -f $ZTST_srcdir/../lib/ftb-switch-group $pid 1 bold,underline $tmp_dir -1)"}[1]}
   }
 0:the active group's style applies to bracketed names, with padding before them too
 >$'\C-[[0m  [ab]   \C-[[00m\C-[[0m\C-[[22;1;4m[abcdef]\C-[[22;24m \C-[[00m'
@@ -699,10 +699,29 @@
       2${bs}$'\e[0m·beta\0beta\0' \
       > $tmp_dir/completions.$pid
     print -rl -- '[ab]' '[cd]' > $tmp_dir/groups.$pid
-    print -r -- ${(q+)${(f)"$($commands[zsh] -f $ZTST_srcdir/../lib/ftb-switch-group $pid 1 bold,underline $tmp_dir 0)"}[1]}
+    print -r -- ${(q+)${(f)"$($commands[zsh] -f $ZTST_srcdir/../lib/ftb-switch-group $pid 1 bold,underline $tmp_dir -1)"}[1]}
   }
 0:with a dim header the active name is undimmed (22) before its style
 >$'\C-[[38;2;0;175;255m\C-[[2m [ab] \C-[[00m\C-[[38;2;135;175;255m\C-[[2m \C-[[22;1;4m[cd]\C-[[22;24m \C-[[00m'
+
+  () {
+    emulate -L zsh
+    local tmp_dir=$ZTST_tmp/first-switch
+    local pid=$$ bs=$'\b' key
+    mkdir -p $tmp_dir
+    print -rl -- 'h' 1${bs}$'·a\0a\0' 2${bs}$'·b\0b\0' 3${bs}$'·c\0c\0' > $tmp_dir/completions.$pid
+    print -rl -- 'one' 'two' 'three' > $tmp_dir/groups.$pid
+    for key in 1 X 1 1 1 X -1 -1 -1; do
+      if [[ $key == X ]]; then
+        rm -f $tmp_dir/current-group.$pid; print -n 'all '; continue
+      fi
+      $commands[zsh] -f $ZTST_srcdir/../lib/ftb-switch-group $pid 1 none $tmp_dir $key > /dev/null
+      print -n "$key:$(<$tmp_dir/current-group.$pid) "
+    done
+    print
+  }
+0:the first switch goes to the first group (next) or the last (previous), then steps and wraps
+>1:1 all 1:1 1:2 1:3 all -1:3 -1:2 -1:1 
 
   () {
     emulate -L zsh

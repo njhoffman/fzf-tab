@@ -7,6 +7,14 @@ fork counter (`1.3.0+nj.N`, see CLAUDE.md).
 
 ## [Unreleased]
 
+## [1.3.0+nj.24] - 2026-11-27
+
+### Changed
+
+- The first group switch goes to an end of the list: the next-group key (`switch-group`'s second)
+  selects the first group, the previous-group key the last. Every group's rows show until then, so
+  both used to jump to the second group, as upstream does.
+
 ## [1.3.0+nj.23] - 2026-11-27
 
 ### Added
