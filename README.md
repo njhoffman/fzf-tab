@@ -1,7 +1,15 @@
 # fzf-tab
 
-[![Zsh compability](https://github.com/Aloxaf/fzf-tab/actions/workflows/zsh.yaml/badge.svg)](https://github.com/Aloxaf/fzf-tab/actions/workflows/zsh.yaml)
-[![GitHub license](https://img.shields.io/github/license/Aloxaf/fzf-tab)](https://github.com/Aloxaf/fzf-tab/blob/master/LICENSE)
+[![Zsh compability](https://github.com/njhoffman/fzf-tab/actions/workflows/zsh.yaml/badge.svg)](https://github.com/njhoffman/fzf-tab/actions/workflows/zsh.yaml)
+[![GitHub license](https://img.shields.io/github/license/njhoffman/fzf-tab)](https://github.com/njhoffman/fzf-tab/blob/master/LICENSE)
+
+> [!NOTE]
+>
+> This is [njhoffman/fzf-tab](https://github.com/njhoffman/fzf-tab), a fork of
+> [Aloxaf/fzf-tab](https://github.com/Aloxaf/fzf-tab) that follows upstream and adds the zstyles in
+> [Fork additions](#fork-additions); [CHANGELOG.md](CHANGELOG.md) lists the fork's changes. The
+> install instructions below are upstream's: use `njhoffman/fzf-tab` in place of `Aloxaf/fzf-tab`
+> for the fork.
 
 Replace zsh's default completion selection menu with fzf!
 
@@ -118,8 +126,12 @@ zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always $realpath'
 # custom fzf flags
 # NOTE: fzf-tab does not follow FZF_DEFAULT_OPTS by default
 zstyle ':fzf-tab:*' fzf-flags --color=fg:1,fg+:2 --bind=tab:accept
-# To make fzf-tab follow FZF_DEFAULT_OPTS.
+# To make fzf-tab follow FZF_DEFAULT_OPTS, and the file FZF_DEFAULT_OPTS_FILE names
+# (without it, both are cleared for fzf-tab's fzf).
 # NOTE: This may lead to unexpected behavior since some flags break this plugin. See Aloxaf/fzf-tab#455.
+# Two of their options are always turned off (fzf-flags can turn them on again): --history
+# (completion queries would fill fzf's search history) and --preview, unless fzf-preview gives
+# one (fzf-tab's rows are not paths).
 zstyle ':fzf-tab:*' use-fzf-default-opts yes
 # switch group using `<` and `>`
 zstyle ':fzf-tab:*' switch-group '<' '>'
@@ -181,7 +193,8 @@ tmux popup (`fzf-command ftb-tmux-popup`), next to upstream's `popup-pad`, `popu
 # the popup's border, as tmux display-popup -b and -S take them
 zstyle ':fzf-tab:*' popup-border-style rounded      # default rounded
 zstyle ':fzf-tab:*' popup-border-color fg=black     # default fg=black
-# upper bounds for the popup, in cells (default: the window's size)
+# upper bounds (default: the window's size): the list's rows, to which the popup adds 4 for its
+# border and fzf's own lines (max-height 3 gives a popup 7 high), and the popup's width in cells
 zstyle ':fzf-tab:*' popup-max-height 20
 zstyle ':fzf-tab:*' popup-max-width 100
 # added to the widest candidate to size the popup (default 5)
@@ -199,6 +212,8 @@ By default, fzf-tab uses [zsh-ls-colors](https://github.com/xPMo/zsh-ls-colors) 
 
 However, it is a pure zsh script and is slow if you have too many files to colorize.
 fzf-tab is shipped with a binary module to speed up this process. You can build it with `build-fzf-tab-module`, then it will be enabled automatically.
+
+In this fork, `FZF_TAB_NO_MODULE=1` (set before fzf-tab loads) keeps the built module unloaded, for the pure zsh path; the test runner uses it to run the suite both ways.
 
 # Difference from other plugins
 

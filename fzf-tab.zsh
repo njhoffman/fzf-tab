@@ -640,7 +640,9 @@ typeset -ga _ftb_group_colors=(
           "See https://github.com/Aloxaf/fzf-tab/pull/132 for more information%f%b"
   fi
 
-  if [[ -n $FZF_TAB_HOME/modules/Src/aloxaf/fzftab.(so|bundle)(#qN) ]]; then
+  # FZF_TAB_NO_MODULE=1: the pure-zsh path even with the module built (the
+  # test runner runs both; also for comparing the two)
+  if [[ ${FZF_TAB_NO_MODULE:-0} != 1 && -n $FZF_TAB_HOME/modules/Src/aloxaf/fzftab.(so|bundle)(#qN) ]]; then
     module_path+=("$FZF_TAB_HOME/modules/Src")
     zmodload aloxaf/fzftab # if this fails, we fall back to ls-colors.zsh below
 

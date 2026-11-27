@@ -7,6 +7,22 @@ fork counter (`1.3.0+nj.N`, see CLAUDE.md).
 
 ## [Unreleased]
 
+## [1.3.0+nj.19] - 2026-11-26
+
+### Added
+
+- `FZF_TAB_NO_MODULE=1`, set before fzf-tab loads, keeps a built C module unloaded (the pure zsh
+  path). The test runner runs each test file without and then with the module when it is built.
+
+### Changed
+
+- `modules/Src/fzftab.c` is upstream's file again: the fork had only reformatted it, which made
+  every upstream change to the module a merge conflict. No change in behavior.
+- CI uses `actions/checkout@v5` and runs the tests on macOS too.
+- README.md says it is the fork (badges point at the fork's CI), describes `popup-max-height` as
+  bounding the list's rows (the popup adds 4), and says what `use-fzf-default-opts` covers
+  (`FZF_DEFAULT_OPTS_FILE` too) and that `--history` and `--preview` are always turned off.
+
 ## [1.3.0+nj.18] - 2026-11-26
 
 ### Fixed

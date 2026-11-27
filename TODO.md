@@ -30,38 +30,6 @@ Scanned 2026-11-22: upstream's 88 open issues and 27 open PRs (the fork has issu
   take upstream's versions in the next sync and drop the fork's copies. #582 adds `reverse` to
   `active-group-style` next to the fork's `italic`/`bold,italic`: align the token lists.
 
-## Docs
-
-- [ ] **README.md misdescribes or omits some fork behavior.** (p3) [docs] "Fork additions" calls
-  `popup-max-height`/`popup-max-width` "upper bounds for the popup, in cells", but the height bounds
-  the list rows (the popup gets 4 more: max-height 3 gives `-h 7` in the tests). It does not say
-  that `use-fzf-default-opts` also governs `FZF_DEFAULT_OPTS_FILE`, or that `--no-history` (and
-  `--no-preview` without an `fzf-preview`) are always passed. The badges and Install section point
-  at Aloxaf's repository and CI, not the fork's; decide whether the fork's README says so.
-
-## Tests and upkeep
-
-- [ ] **The local suite only exercises the C module.** (p3) [test] With
-  `modules/Src/aloxaf/fzftab.so` built (charon, since `~/.shell` 0.131.0), `fzf-tab.zsh` loads it
-  in the tests too, so local runs never cover the pure-zsh `-ftb-compadd` loop and zsh-ls-colors;
-  only CI's first step does, after a push (nj.16's bug was the reverse case). Add a switch (an
-  environment variable the init checks, or a runner option that hides the `.so`) and run both
-  locally.
-- [ ] **Workflows use `actions/checkout@v1`.** (p3) [chore] All three workflows pin v1 (a
-  deprecated Node runtime); move to `actions/checkout@v4`. The macOS workflow still runs no tests
-  (upstream's FIXME, the test steps commented out); try enabling them now that CI runs on the fork.
-- [ ] **`modules/Src/fzftab.c` is reformatted against upstream.** (p3) [refactor] Commit 8a8d275
-  ("misc fixes", 2025-10) reflowed the whole file (811 lines changed, 99 with `-w`, apparently
-  formatting only), so any upstream change to the module will conflict on merge. Restore
-  upstream's formatting (`git checkout upstream/master -- modules/Src/fzftab.c`, after confirming
-  no functional difference), as with the blank lines added to `fzf-tab.plugin.zsh` and
-  `lib/-ftb-generate-header`.
-- [ ] **`~/.shell`'s fzf-tab config has dead entries.** (p3) [chore] In
-  `~/.shell/zsh/plugin-configs/fzf-tab.zsh`: `FTB_POPUP_DEV` points at
-  `~/.zinit/plugins/Aloxaf/fzf-tab/ftb-tmux-popup` (no such plugin; the script is in `lib/` and
-  must be called by name), `FZF_BIN=${}` is unused, and `zstyle ':fzf-tab:*' multi-group` is read
-  by neither the fork nor upstream. The change belongs in `~/.shell`.
-
 ## Completed
 
 ### Loading (completed 2026-11-22)
@@ -284,3 +252,43 @@ Scanned 2026-11-22: upstream's 88 open issues and 27 open PRs (the fork has issu
   a clear message (and return non-zero) when `$+commands[fzf]` is 0.
   Done 2026-11-26 (1.3.0+nj.18): Tab falls back to zsh's completion with a notice once; ftb-fzf
   and the popup say "fzf not found on PATH" and return 127.
+
+### Docs (completed 2026-11-26)
+
+- [x] **README.md misdescribes or omits some fork behavior.** (p3) [docs] "Fork additions" calls
+  `popup-max-height`/`popup-max-width` "upper bounds for the popup, in cells", but the height bounds
+  the list rows (the popup gets 4 more: max-height 3 gives `-h 7` in the tests). It does not say
+  that `use-fzf-default-opts` also governs `FZF_DEFAULT_OPTS_FILE`, or that `--no-history` (and
+  `--no-preview` without an `fzf-preview`) are always passed. The badges and Install section point
+  at Aloxaf's repository and CI, not the fork's; decide whether the fork's README says so.
+  Done 2026-11-26 (1.3.0+nj.19): the popup bounds and the defaults' handling are described;
+  a note under the title says it is the fork, and the badges point at the fork.
+
+### Tests and upkeep (completed 2026-11-26)
+
+- [x] **The local suite only exercises the C module.** (p3) [test] With
+  `modules/Src/aloxaf/fzftab.so` built (charon, since `~/.shell` 0.131.0), `fzf-tab.zsh` loads it
+  in the tests too, so local runs never cover the pure-zsh `-ftb-compadd` loop and zsh-ls-colors;
+  only CI's first step does, after a push (nj.16's bug was the reverse case). Add a switch (an
+  environment variable the init checks, or a runner option that hides the `.so`) and run both
+  locally.
+  Done 2026-11-26 (1.3.0+nj.19): `FZF_TAB_NO_MODULE=1` skips the module; `runtests.zsh` runs
+  each file without and then with it when it is built.
+- [x] **Workflows use `actions/checkout@v1`.** (p3) [chore] All three workflows pin v1 (a
+  deprecated Node runtime); move to `actions/checkout@v4`. The macOS workflow still runs no tests
+  (upstream's FIXME, the test steps commented out); try enabling them now that CI runs on the fork.
+  Done 2026-11-26 (1.3.0+nj.19): `actions/checkout@v5` (Node 24); the macOS test steps are on.
+- [x] **`modules/Src/fzftab.c` is reformatted against upstream.** (p3) [refactor] Commit 8a8d275
+  ("misc fixes", 2025-10) reflowed the whole file (811 lines changed, 99 with `-w`, apparently
+  formatting only), so any upstream change to the module will conflict on merge. Restore
+  upstream's formatting (`git checkout upstream/master -- modules/Src/fzftab.c`, after confirming
+  no functional difference), as with the blank lines added to `fzf-tab.plugin.zsh` and
+  `lib/-ftb-generate-header`.
+  Done 2026-11-26 (1.3.0+nj.19): upstream's file restored (identical once whitespace is
+  removed); the module builds and the suite passes with it.
+- [x] **`~/.shell`'s fzf-tab config has dead entries.** (p3) [chore] In
+  `~/.shell/zsh/plugin-configs/fzf-tab.zsh`: `FTB_POPUP_DEV` points at
+  `~/.zinit/plugins/Aloxaf/fzf-tab/ftb-tmux-popup` (no such plugin; the script is in `lib/` and
+  must be called by name), `FZF_BIN=${}` is unused, and `zstyle ':fzf-tab:*' multi-group` is read
+  by neither the fork nor upstream. The change belongs in `~/.shell`.
+  Done 2026-11-26 (`~/.shell` 0.138.7): the three entries are gone.

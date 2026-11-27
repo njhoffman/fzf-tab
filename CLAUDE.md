@@ -18,7 +18,9 @@ Guidance for Claude Code in this repository: `njhoffman/fzf-tab`, a fork of
 
 - `cd test && zsh -f ./runtests.zsh fzftab.ztst`: the test suite (zpty-driven completion tests;
   fzf is replaced by `test/select`, or `test/select-once` for one round of an expect key; tmux by
-  `test/popup-tmux`, which logs `display-popup`'s arguments).
+  `test/popup-tmux`, which logs `display-popup`'s arguments). With the C module built it runs
+  twice, without the module (`FZF_TAB_NO_MODULE=1`) and then with it; setting `FZF_TAB_NO_MODULE`
+  picks one pass.
 - `zsh -n fzf-tab.zsh lib/<file>`: syntax check.
 
 ## Layout
@@ -41,6 +43,8 @@ Guidance for Claude Code in this repository: `njhoffman/fzf-tab`, a fork of
   `gh repo set-default njhoffman/fzf-tab` once, and still pass `-R` on writes (`gh release create`).
 - Check upstream now and then for new issues, PRs and commits (the recurring item in TODO.md has
   the last date and the commands), and read only: never comment, open PRs or file issues there.
+- Keep upstream's files as upstream has them where the fork changes no behavior: no reformatting
+  (8a8d275 reflowed `modules/Src/fzftab.c` and had to be undone), so merges stay clean.
 - Sync by merging `upstream/master` into `master` (never rebase: `origin/master` is published).
   Resolve conflicts keeping the fork's features and upstream's fixes, and list each resolution in
   the merge commit.
