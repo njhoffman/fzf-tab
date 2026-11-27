@@ -237,12 +237,14 @@
 >C1:{project_al_pha_benchmark_1234/}
 >C1:{project_alpha_1234_final/}
 
+  # candidates from compadd, not files: a filesystem that ignores case (macOS) keeps one of the
+  # two. _description passes matcher-list's matchers to compadd (a bare compadd gets none).
   comptesteval "zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'"
-  comptesteval 'touch xaaa Xaaa'
-  comptest $': x\t'
-  comptesteval 'rm xaaa Xaaa; zstyle -d ":completion:*" matcher-list'
+  comptesteval '_tst() { local expl; _description files expl file; compadd "$expl[@]" Xaaa xaaa }'
+  comptest $'tst x\t'
+  comptesteval 'zstyle -d ":completion:*" matcher-list'
 0:case-insensitive twins open the picker (this debug-command picks nothing)
->line: {: x}{}
+>line: {tst x}{}
 >QUERY:{}
 >DESCRIPTION:{file}
 >C1:{Xaaa}

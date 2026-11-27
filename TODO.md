@@ -39,6 +39,11 @@ Scanned 2026-11-22: upstream's 88 open issues and 27 open PRs (the fork has issu
   A filesystem difference, not a fzf-tab bug; Linux and every zsh version pass. Make the
   candidates with `compadd xaaa Xaaa` in a `_tst` (as the other matcher tests do) so the test
   does not depend on the filesystem, then see whether macOS passes the rest of the suite.
+- [ ] **No test isolates the case-twins guard (upstream #600).** (p3) [test] With the
+  `${(L)word} == ${(L)unamb}` check in `-ftb-unambiguous-safe` disabled, the whole suite still
+  passes (checked 2026-11-27, with the file-based twins test and the compadd one alike): another
+  fast-path check stops the insert first in "case-insensitive twins open the picker". Find a case
+  only that check catches (#600's own report), or note which check makes it redundant.
 
 ## Completed
 
