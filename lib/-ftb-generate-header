@@ -22,6 +22,10 @@ done
 mlen+=1
 
 -ftb-zstyle -a group-colors group_colors || group_colors=($_ftb_group_colors)
+# group-header-align: left (default) or center, each name in its column
+local align cell
+-ftb-zstyle -s group-header-align align || align=left
+local -i pad_left
 
 for (( i=1; i<=$#_ftb_groups; i++ )); do
   [[ $_ftb_groups[i] == "__hide__"* ]] && continue
@@ -30,12 +34,16 @@ for (( i=1; i<=$#_ftb_groups; i++ )); do
     _ftb_headers+=$tmp
     tmp='' && len=0
   fi
+  # the name, after the spaces that center it in its column
+  pad_left=0
+  [[ $align == center ]] && pad_left=$(( (mlen - $#_ftb_groups[i]) / 2 ))
+  cell=${(l:pad_left:)${:-}}$_ftb_groups[i]
   if (( len + mlen > COLUMNS - 5 )); then
-    # the last column doesn't need padding
-    _ftb_headers+=$tmp$group_colors[i]$_ftb_groups[i]$'\033[00m'
+    # the last column doesn't need padding after the name
+    _ftb_headers+=$tmp$group_colors[i]$cell$'\033[00m'
     tmp='' && len=0
   else
-    tmp+=$group_colors[i]${(r:$mlen:)_ftb_groups[i]}$'\033[00m'
+    tmp+=$group_colors[i]${(r:$mlen:)cell}$'\033[00m'
     len+=$mlen
   fi
 done

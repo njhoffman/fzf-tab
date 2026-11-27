@@ -636,6 +636,36 @@
 
   () {
     emulate -L zsh
+    local tmp_dir=$ZTST_tmp/bracketed-centered-groups
+    local pid=$$ bs=$'\b'
+    mkdir -p $tmp_dir
+    # a '[%d]' descriptions format brackets the names; centered, they have spaces on both sides
+    print -rl -- \
+      $'\e[0m  [ab]   \e[00m\e[0m[abcdef] \e[00m' \
+      1${bs}$'\e[0m·alpha\0alpha\0' \
+      2${bs}$'\e[0m·beta\0beta\0' \
+      > $tmp_dir/completions.$pid
+    print -rl -- '[ab]' '[abcdef]' > $tmp_dir/groups.$pid
+    print -r -- ${(q+)${(f)"$($commands[zsh] -f $ZTST_srcdir/../lib/ftb-switch-group $pid 1 bold,underline $tmp_dir 0)"}[1]}
+  }
+0:the active group's style applies to bracketed names, with padding before them too
+>$'\C-[[0m  [ab]   \C-[[00m\C-[[0m\C-[[1;4m[abcdef]\C-[[22;24m \C-[[00m'
+
+  zsh -f -c "source $ZTST_srcdir/../fzf-tab.zsh
+    zstyle ':fzf-tab:*' group-colors '<1>' '<2>' '<3>'
+    COLUMNS=80 _ftb_groups=('[ab]' '[abcdef]' '[abc]')
+    -ftb-generate-header; print -r -- \"\$_ftb_headers\"
+    zstyle ':fzf-tab:*' group-header-align center
+    -ftb-generate-header; print -r -- \"\$_ftb_headers\"
+    COLUMNS=24; -ftb-generate-header; print -rl -- \$_ftb_headers" | command sed $'s/\e\\[00m/|/g'
+0:group-header-align center centers each name in its column, also on wrapped header lines
+><1>[ab]     |<2>[abcdef] |<3>[abc]    |
+><1>  [ab]   |<2>[abcdef] |<3>  [abc]  |
+><1>  [ab]   |<2>[abcdef] |
+><3>  [abc]  |
+
+  () {
+    emulate -L zsh
     local tmp_dir=$ZTST_tmp/ungrouped-reset-colors
     local pid=$$
     mkdir -p $tmp_dir
@@ -661,6 +691,22 @@
 0:a custom fzf-command runs as configured (not replaced by ftb-fzf)
 >line: {tst }{}
 >stub-ran
+
+  comptesteval "argsfzf() { print -rl -- \"\$@\" > $PWD/argsfzf.log }; zstyle -d ':fzf-tab:*' debug-command; zstyle ':fzf-tab:*' fzf-command argsfzf"
+  comptesteval '_tst() { compadd alpha beta }'
+  local style
+  for style in bold,underline 'bold underline' 'Underline,BOLD' 'bold,blink'; do
+    comptesteval "zstyle ':fzf-tab:*' active-group-style $style"
+    comptest $'tst \t' >/dev/null
+    print -r -- "$style -> $(command grep -o 'ftb-switch-group [0-9]* [0-9]* [^ ]*' argsfzf.log | head -1 | cut -d' ' -f4)"
+  done
+  comptesteval "zstyle -d ':fzf-tab:*' active-group-style; zstyle -d ':fzf-tab:*' fzf-command; zstyle ':fzf-tab:*' debug-command $ZTST_srcdir/select -n 1 -h '\$#_ftb_headers' -q '\"\$_ftb_query\"'"
+  rm -f argsfzf.log
+0:active-group-style as one comma-separated word or as separate words, any case; unknown styles dropped
+>bold,underline -> bold,underline
+>bold underline -> bold,underline
+>Underline,BOLD -> bold,underline
+>bold,blink -> bold
 
   zsh -f -c "source $ZTST_srcdir/../fzf-tab.zsh; v=\$FZF_TAB_MODULE_VERSION; source $ZTST_srcdir/../fzf-tab.zsh; [[ \$v == \$FZF_TAB_MODULE_VERSION ]] && print same-version" </dev/null 2>&1
 0:sourcing fzf-tab again keeps the C module's version and asks for no rebuild

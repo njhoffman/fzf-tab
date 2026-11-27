@@ -83,11 +83,15 @@ fi
 
 # print headers
 if (( header_lines != 0 )); then
-  # Apply style only to the exact group label, excluding its padding.
+  # Apply style only to the exact group label, excluding its padding (on either
+  # side: group-header-align center pads before it too). The label is matched
+  # as it is: a substituted parameter is no pattern here (no GLOB_SUBST), so
+  # (b)'s backslashes would be matched literally and a label with [ ] or *,
+  # such as a '[%d]' descriptions format makes, never matched.
   local header
   for header in "${(@)list[1,header_lines]}"; do
     if [[ -n $current_group && $current_group != __hide__* ]]; then
-      header=${header/(#b)($'\x1b['[0-9;]#m)(${(b)current_group})( #)($'\x1b[00m')/$match[1]$sgr_on$match[2]$sgr_off$match[3]$match[4]}
+      header=${header/(#b)($'\x1b['[0-9;]#m)( #)(${current_group})( #)($'\x1b[00m')/$match[1]$match[2]$sgr_on$match[3]$sgr_off$match[4]$match[5]}
     fi
     print -r -- $header
   done

@@ -7,6 +7,21 @@ fork counter (`1.3.0+nj.N`, see CLAUDE.md).
 
 ## [Unreleased]
 
+## [1.3.0+nj.21] - 2026-11-27
+
+### Added
+
+- `group-header-align center` centers each group name in its column of the header line (default
+  `left`, as before).
+
+### Fixed
+
+- The active group's header gets its `active-group-style` decoration. A comma-separated value
+  (`bold,italic`, as this README showed) was dropped whole, which left no style at all; both
+  `bold,italic` and upstream's `bold italic` work now.
+- The decoration also applies to group names with brackets or other pattern characters, such as a
+  `'[%d]'` descriptions format gives (`[alias]`); they never matched.
+
 ## [1.3.0+nj.20] - 2026-11-27
 
 ### Added
