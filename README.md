@@ -164,6 +164,16 @@ Group headers:
 zstyle ':fzf-tab:*' active-group-style bold,italic
 ```
 
+Focus reporting:
+
+```zsh
+# fzf-tab turns the terminal's focus reporting (\e[?1004h) off while fzf runs, so a tmux pane
+# switch puts no \e[I / \e[O (an I or O) in the query or on the command line. With restore it
+# turns it on again after fzf, for a shell that keeps it on at the prompt (fzf-tab cannot ask
+# the terminal whether it was on). Default: off (left off after fzf)
+zstyle ':fzf-tab:*' focus-reporting restore
+```
+
 tmux popup (`fzf-command ftb-tmux-popup`), next to upstream's `popup-pad`, `popup-min-size` and
 `popup-smart-tab`:
 

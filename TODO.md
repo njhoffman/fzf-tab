@@ -1,6 +1,6 @@
 # TODO
 
-Open work on the `njhoffman/fzf-tab` fork. Reviewed: 2026-11-22
+Open work on the `njhoffman/fzf-tab` fork. Reviewed: 2026-11-26
 
 Categories: bug feature refactor docs test chore perf
 
@@ -21,6 +21,82 @@ Scanned 2026-11-22: upstream's 88 open issues and 27 open PRs (the fork has issu
   `--style` height adjustment the fork has) are open upstream by other authors. If they merge,
   take upstream's versions in the next sync and drop the fork's copies. #582 adds `reverse` to
   `active-group-style` next to the fork's `italic`/`bold,italic`: align the token lists.
+
+## Robustness
+
+- [x] **Focus events type I or O on a tmux pane switch.** (p2) [bug] `ftb-fzf` runs
+  `$commands[fzf]`, past fzx's `fzf` function that turned focus reporting off, so `\e[I`/`\e[O`
+  reached fzf (or, with the popup, the command line). `-ftb-fzf` now turns it off around fzf;
+  `focus-reporting restore` turns it on after (1.3.0+nj.17).
+
+- [ ] **Sourcing fzf-tab again with the C module loaded asks to rebuild it.** (p2) [bug]
+  `fzf-tab.zsh:586` unsets `FZF_TAB_MODULE_VERSION` unconditionally, right above upstream's #559
+  guard that keeps it when the module is already loaded (the nj.6 re-merge kept both). A second
+  `source` (a `source ~/.zshrc`, a plugin reload) then finds the version empty, prints
+  "parameter `FZF_TAB_MODULE_VERSION' already deleted" from `zmodload -u`, prompts "fzftab module
+  needs to be rebuild" (`read -q`) and sources zsh-ls-colors too. Reproduced 2026-11-26 with the
+  module built here. Drop line 586; test: source twice, the version stays `0.2.2`, no prompt.
+- [ ] **The temporary directory is trusted without checking who owns it.** (p2) [bug]
+  `lib/-ftb-fzf:11` uses `${TMPPREFIX:-/tmp/zsh}-fzf-tab-$USER` if it exists (`[[ -d ]]`),
+  else `mkdir` with the umask (775 here); `lib/ftb-tmux-popup:53` the same. Files in it are
+  sourced: `ftb_preview_init.$$` by every preview and binding, `fzf-$$` by the popup. On a
+  multi-user host another user can create that predictable path first and swap those files
+  (code runs as you). Upstream has the same code. `mkdir -p -m 700`, then require `-O` and not a
+  symlink (else stop with a message, or fall back to `$XDG_RUNTIME_DIR`); `-p` also covers a
+  `TMPPREFIX` whose parent does not exist yet.
+- [ ] **The tmux popup ignores a one-line status bar at the top.** (p3) [bug]
+  `lib/ftb-tmux-popup:43-49` adds `#{status}` to the cursor row when `status-position` is `top`,
+  but tmux reports `on` (not 1) for a one-line status; in arithmetic `on` is an unset parameter, so
+  the offset is 0 and the popup's row and height bound are one line off (upstream #270 assumed a
+  number). This tmux has `status on`, `status-position top`; not visible now since `~/.shell`
+  uses `fzf-command fzf`. Map `on`→1, `off`→0, numbers as they are; test with
+  `POPUP_SCREEN='... on top'` (all popup tests use `on bottom`).
+- [ ] **`fzf-tmux-width-factor` is 0 when `ftb-tmux-popup` runs on its own.** (p3) [bug] The
+  popup reads `fzf_tmux_width_factor` from `-ftb-fzf`'s scope (`lib/-ftb-fzf:55`), so
+  `ls | ftb-tmux-popup` gets 0, not the documented default 5. Read the zstyle in
+  `ftb-tmux-popup` itself, as it does for the other popup options.
+- [ ] **`disable-fzf-tab` leaves fzf-tab bound in other keymaps.** (p3) [bug] Enabling binds `^I`
+  and `^X.` in both `emacs` and `viins`; disabling rebinds `^I` only in the current main keymap and
+  leaves `^X.` on `fzf-tab-debug`, so the other keymap's Tab calls `fzf-tab-complete` with
+  `_ftb_orig_widget` unset. `fzf-tab.zsh:428` also unsets `_ftb_orig_list_groupded` (typo, the
+  variable stays). Upstream's code; restore both keymaps and fix the name.
+- [ ] **No fzf installed gives "command not found: --ansi".** (p3) [bug] `lib/ftb-fzf` runs
+  `$commands[fzf] $@`, and `lib/ftb-tmux-popup:121` writes `$commands[fzf]` into the popup's
+  command: with no fzf on `PATH` both are empty and the first fzf option becomes the command. Print
+  a clear message (and return non-zero) when `$+commands[fzf]` is 0. Fold into the separate
+  ftb-fzf rework if that changes how fzf is found.
+
+## Docs
+
+- [ ] **README.md misdescribes or omits some fork behavior.** (p3) [docs] "Fork additions" calls
+  `popup-max-height`/`popup-max-width` "upper bounds for the popup, in cells", but the height bounds
+  the list rows (the popup gets 4 more: max-height 3 gives `-h 7` in the tests). It does not say
+  that `use-fzf-default-opts` also governs `FZF_DEFAULT_OPTS_FILE`, or that `--no-history` (and
+  `--no-preview` without an `fzf-preview`) are always passed. The badges and Install section point
+  at Aloxaf's repository and CI, not the fork's; decide whether the fork's README says so.
+
+## Tests and upkeep
+
+- [ ] **The local suite only exercises the C module.** (p3) [test] With
+  `modules/Src/aloxaf/fzftab.so` built (charon, since `~/.shell` 0.131.0), `fzf-tab.zsh` loads it
+  in the tests too, so local runs never cover the pure-zsh `-ftb-compadd` loop and zsh-ls-colors;
+  only CI's first step does, after a push (nj.16's bug was the reverse case). Add a switch (an
+  environment variable the init checks, or a runner option that hides the `.so`) and run both
+  locally.
+- [ ] **Workflows use `actions/checkout@v1`.** (p3) [chore] All three workflows pin v1 (a
+  deprecated Node runtime); move to `actions/checkout@v4`. The macOS workflow still runs no tests
+  (upstream's FIXME, the test steps commented out); try enabling them now that CI runs on the fork.
+- [ ] **`modules/Src/fzftab.c` is reformatted against upstream.** (p3) [refactor] Commit 8a8d275
+  ("misc fixes", 2025-10) reflowed the whole file (811 lines changed, 99 with `-w`, apparently
+  formatting only), so any upstream change to the module will conflict on merge. Restore
+  upstream's formatting (`git checkout upstream/master -- modules/Src/fzftab.c`, after confirming
+  no functional difference), as with the blank lines added to `fzf-tab.plugin.zsh` and
+  `lib/-ftb-generate-header`.
+- [ ] **`~/.shell`'s fzf-tab config has dead entries.** (p3) [chore] In
+  `~/.shell/zsh/plugin-configs/fzf-tab.zsh`: `FTB_POPUP_DEV` points at
+  `~/.zinit/plugins/Aloxaf/fzf-tab/ftb-tmux-popup` (no such plugin; the script is in `lib/` and
+  must be called by name), `FZF_BIN=${}` is unused, and `zstyle ':fzf-tab:*' multi-group` is read
+  by neither the fork nor upstream. The change belongs in `~/.shell`.
 
 ## Completed
 

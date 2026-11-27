@@ -54,6 +54,8 @@ local ret=0
 -ftb-zstyle -b use-fzf-default-opts use_fzf_default_opts || use_fzf_default_opts="no"
 -ftb-zstyle -s fzf-tmux-width-factor fzf_tmux_width_factor || fzf_tmux_width_factor=5
 -ftb-zstyle -a active-group-style active_group_style || active_group_style=(bold)
+local focus_reporting
+-ftb-zstyle -s focus-reporting focus_reporting || focus_reporting=off
 
 -ftb-zstyle -a debug-command debug_command && {
   ${(eX)debug_command} $fzf_flags
@@ -114,6 +116,13 @@ if [[ "$use_fzf_default_opts" == "yes" ]]; then
   fzf_default_opts_file=${FZF_DEFAULT_OPTS_FILE-}
 fi
 
+# Focus reporting (\e[?1004h) that a shell turned on for its prompt would send
+# \e[I and \e[O on every tmux pane switch while fzf is open: into fzf's query,
+# or with the popup, queued up for the command line. It goes off while fzf runs;
+# focus-reporting restore turns it on again after, for a shell that wants it on
+# at the prompt (fzf-tab cannot ask the terminal whether it was on).
+{ print -n -- '\e[?1004l' >/dev/tty } 2>/dev/null
+
 FZF_DEFAULT_OPTS=$fzf_default_opts FZF_DEFAULT_OPTS_FILE=$fzf_default_opts_file SHELL=$ZSH_NAME ${(z)fzf_command} \
   --ansi \
   --bind=$binds \
@@ -133,6 +142,8 @@ FZF_DEFAULT_OPTS=$fzf_default_opts FZF_DEFAULT_OPTS_FILE=$fzf_default_opts_file 
   ${fzf_preview:+--preview=${ftb_preview_init}$fzf_preview} \
   $no_preview \
   $fzf_flags < $tmp_dir/completions.$$ || ret=$?
+
+[[ $focus_reporting == restore ]] && { print -n -- '\e[?1004h' >/dev/tty } 2>/dev/null
 
 if (( ! use_tmux_popup )); then
   echoti civis >/dev/tty 2>/dev/null

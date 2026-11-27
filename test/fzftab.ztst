@@ -407,6 +407,18 @@
 >no-nested-popup
 
   comptesteval "export POPUP_LOG=$PWD/popup.log POPUP_SCREEN='0 10 0 5 40 120 on bottom' TMUX_PANE=%1 PATH=$PWD/popup-bin:\$PATH"
+  comptesteval "zstyle -d ':fzf-tab:*' debug-command; zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup; zstyle ':fzf-tab:*' focus-reporting restore"
+  comptesteval '_tst() { compadd alpha beta }'
+  comptest $'tst \t'
+  comptesteval "zstyle -d ':fzf-tab:*' fzf-command; zstyle -d ':fzf-tab:*' focus-reporting; unset TMUX_PANE"
+  comptesteval "zstyle ':fzf-tab:*' debug-command $ZTST_srcdir/select -n 1 -h '\$#_ftb_headers' -q '\"\$_ftb_query\"'"
+  raw=${(j::)logs}
+  [[ -s popup.log && $raw == *$'\e[?1004l'*$'\e[?1004h'* ]] && print popup-off-and-restored
+0:popup: focus reporting off around the popup too
+>line: {tst }{}
+>popup-off-and-restored
+
+  comptesteval "export POPUP_LOG=$PWD/popup.log POPUP_SCREEN='0 10 0 5 40 120 on bottom' TMUX_PANE=%1 PATH=$PWD/popup-bin:\$PATH"
   comptesteval "zstyle -d ':fzf-tab:*' debug-command; zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup; zstyle ':fzf-tab:complete:*' fzf-preview 'print -r -- \"word=\$word realpath=\$realpath\"'"
   comptest $': di\t'
   comptesteval "zstyle -d ':fzf-tab:*' fzf-command; zstyle -d ':fzf-tab:complete:*' fzf-preview; unset TMUX_PANE"
@@ -571,6 +583,24 @@
 0:a custom fzf-command runs as configured (not replaced by ftb-fzf)
 >line: {tst }{}
 >stub-ran
+
+  comptesteval "ttyfzf() { print -n -- '<FZF>' >/dev/tty }; zstyle -d ':fzf-tab:*' debug-command; zstyle ':fzf-tab:*' fzf-command ttyfzf"
+  comptesteval '_tst() { compadd alpha beta }'
+  comptest $'tst \t'
+  local raw=${(j::)logs}
+  [[ $raw == *$'\e[?1004l'*'<FZF>'* ]] && print off-before
+  [[ $raw == *'<FZF>'*$'\e[?1004h'* ]] || print not-restored
+  comptesteval "zstyle ':fzf-tab:*' focus-reporting restore"
+  comptest $'tst \t'
+  raw=${(j::)logs}
+  [[ $raw == *$'\e[?1004l'*'<FZF>'*$'\e[?1004h'* ]] && print restored
+  comptesteval "zstyle -d ':fzf-tab:*' focus-reporting; zstyle -d ':fzf-tab:*' fzf-command; zstyle ':fzf-tab:*' debug-command $ZTST_srcdir/select -n 1 -h '\$#_ftb_headers' -q '\"\$_ftb_query\"'"
+0:focus reporting is off while fzf runs, and on after it only with focus-reporting restore
+>line: {tst }{}
+>off-before
+>not-restored
+>line: {tst }{}
+>restored
 
   mkdir -p $PWD/tmpx-fzf-tab-$USER
   : > $PWD/tmpx-fzf-tab-$USER/compcap.999999999

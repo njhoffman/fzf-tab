@@ -7,6 +7,20 @@ fork counter (`1.3.0+nj.N`, see CLAUDE.md).
 
 ## [Unreleased]
 
+## [1.3.0+nj.17] - 2026-11-26
+
+### Fixed
+
+- Switching tmux panes with the completion list open no longer types an I or O (focus events)
+  into fzf's query or, with the popup, onto the command line: fzf-tab turns the terminal's focus
+  reporting off while fzf runs. Since 1.3.0+nj.9 fzf-tab runs the fzf binary directly, past the
+  `fzf` shell function that used to do this.
+
+### Added
+
+- `focus-reporting restore` turns focus reporting on again after fzf, for a shell that keeps it
+  on at the prompt (the default, `off`, leaves it off).
+
 ## [1.3.0+nj.16] - 2026-11-25
 
 ### Fixed
