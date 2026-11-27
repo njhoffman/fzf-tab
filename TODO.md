@@ -10,11 +10,19 @@ Scanned 2026-11-22: upstream's 88 open issues and 27 open PRs (the fork has issu
 ## Upstream overlap
 
 - [ ] **Check upstream for new issues, PRs and commits.** (p3) [chore] Recurring, every week or
-  two. Last checked 2026-11-22: 88 open issues, 27 open PRs, upstream/master at 24105b1 (all
-  merged). `git fetch upstream; git log master..upstream/master`; `gh issue list -R
+  two. Last checked 2026-11-26: 88 open issues, 27 open PRs (one new since 2026-11-22: PR #605,
+  item below), upstream/master at 24105b1 (all merged). `git fetch upstream; git log master..upstream/master`; `gh issue list -R
   Aloxaf/fzf-tab --search "updated:>DATE"` and the same for `gh pr list`. Add an item for each one
   that affects this setup, merge new commits as CLAUDE.md says, then update the date here. Never
   comment, open PRs or file issues upstream.
+
+- [ ] **Take upstream PR #605's unclosed-quote tests.** (p3) [test] #605 (open, stacked on #603)
+  fixes Tab doing nothing in an unclosed quote (`tst "foo bar<Tab>` with matches `foo bar1`, `foo
+  bar2`). The fork already passes both of its cases (checked 2026-11-26: #597's guard in
+  `-ftb-unambiguous-safe` covers them, as the PR says), but has no test for them. Add the two
+  ztst cases ("unambiguous prefix in unclosed quote string", with and without a suffix after the
+  cursor); its one-line change to the fast-path check (compare with and without the closing quote)
+  can wait for the merge.
 
 - [ ] **Upstream PRs duplicate the fork's popup features.** (p3) [chore] #543 (`popup-max-height`,
   `popup-max-width`: the fork's names), #523 (`popup-smart-tab-bindings`: same name) and #542 (the

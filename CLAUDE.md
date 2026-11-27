@@ -37,6 +37,8 @@ Guidance for Claude Code in this repository: `njhoffman/fzf-tab`, a fork of
 
 - Remotes: `origin` (this fork), `upstream` (Aloxaf). `master` is the fork's branch; the local
   `upstream` branch tracks `upstream/master`.
+- `gh` without `-R` picks the parent repository (Aloxaf) in a fresh clone: run
+  `gh repo set-default njhoffman/fzf-tab` once, and still pass `-R` on writes (`gh release create`).
 - Check upstream now and then for new issues, PRs and commits (the recurring item in TODO.md has
   the last date and the commands), and read only: never comment, open PRs or file issues there.
 - Sync by merging `upstream/master` into `master` (never rebase: `origin/master` is published).
