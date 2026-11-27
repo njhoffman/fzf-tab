@@ -7,6 +7,20 @@ fork counter (`1.3.0+nj.N`, see CLAUDE.md).
 
 ## [Unreleased]
 
+## [1.3.0+nj.23] - 2026-11-27
+
+### Added
+
+- `group-header-style` gives every name in the header line attributes of its own (`bold`, `dim`,
+  `italic`, `underline`, `reverse`), without touching the candidate rows that share
+  `group-colors`; `dim` sets the other names off from the active one.
+
+### Changed
+
+- The active group's name drops dim (SGR 22 before its `active-group-style`), so a dim group color
+  or `group-header-style dim` no longer dims it too.
+- `group-header-layout compact` puts one space on each side of each name: two between names.
+
 ## [1.3.0+nj.22] - 2026-11-27
 
 ### Added

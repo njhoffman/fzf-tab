@@ -177,8 +177,13 @@ Group headers:
 # comma-separated (bold,italic); none wins over the others
 zstyle ':fzf-tab:*' active-group-style bold,italic
 # the header line's layout: columns (default), each name in a column as wide as the longest,
-# or compact, each name followed by one space
+# or compact, one space on each side of each name
 zstyle ':fzf-tab:*' group-header-layout compact
+# attributes for every name in the header line, not the rows (bold, dim, italic, underline,
+# reverse); the active group's name drops dim when you switch groups, so dim sets the others
+# off. Terminals may dim only truecolor or the 16 named colors (alacritty), not 256-color
+# indexes: use 38;2;R;G;B group-colors for dim to show
+zstyle ':fzf-tab:*' group-header-style dim
 # with columns, each name left (default) or centered in its column
 zstyle ':fzf-tab:*' group-header-align center
 ```

@@ -69,8 +69,10 @@ for style in $active_style_tokens; do
   esac
 done
 
+# 22 (normal intensity) first: a group color that dims its names (SGR 2) would
+# dim the active one too, and bold does not undo dim; the others stay dim
 if (( $#sgr_on_codes )); then
-  sgr_on=$'\x1b['${(j:;:)sgr_on_codes}$'m'
+  sgr_on=$'\x1b[22;'${(j:;:)sgr_on_codes}$'m'
   sgr_off=$'\x1b['${(j:;:)sgr_off_codes}$'m'
 fi
 

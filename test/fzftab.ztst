@@ -607,7 +607,7 @@
       $commands[zsh] -f $ZTST_srcdir/../lib/ftb-switch-group $pid 1 bold $tmp_dir 0
     )}")
     (( $#switched == 2 )) &&
-      [[ $switched[1] == $'\e[0mgroup one  \e[00m\e[0m\e[1mgroup two\e[22m\e[00m' ]] &&
+      [[ $switched[1] == $'\e[0mgroup one  \e[00m\e[0m\e[22;1mgroup two\e[22m\e[00m' ]] &&
       [[ $switched[2] == 2${bs}$'\e[0m·beta\0beta\0' ]]
   }
 0:group switching uses hidden identity when colors are identical
@@ -630,8 +630,8 @@
     done
   }
 0:active-group-style combines any styles, reverse among them; none wins (upstream PR #582)
->italic,reverse $'\C-[[0mgroup one  \C-[[00m\C-[[0m\C-[[3;7mgroup two\C-[[23;27m\C-[[00m'
->bold,italic,reverse,underline $'\C-[[0mgroup one  \C-[[00m\C-[[0m\C-[[1;3;7;4mgroup two\C-[[22;23;27;24m\C-[[00m'
+>italic,reverse $'\C-[[0mgroup one  \C-[[00m\C-[[0m\C-[[22;3;7mgroup two\C-[[23;27m\C-[[00m'
+>bold,italic,reverse,underline $'\C-[[0mgroup one  \C-[[00m\C-[[0m\C-[[22;1;3;7;4mgroup two\C-[[22;23;27;24m\C-[[00m'
 >bold,none $'\C-[[0mgroup one  \C-[[00m\C-[[0mgroup two\C-[[00m'
 
   () {
@@ -649,7 +649,7 @@
     print -r -- ${(q+)${(f)"$($commands[zsh] -f $ZTST_srcdir/../lib/ftb-switch-group $pid 1 bold,underline $tmp_dir 0)"}[1]}
   }
 0:the active group's style applies to bracketed names, with padding before them too
->$'\C-[[0m  [ab]   \C-[[00m\C-[[0m\C-[[1;4m[abcdef]\C-[[22;24m \C-[[00m'
+>$'\C-[[0m  [ab]   \C-[[00m\C-[[0m\C-[[22;1;4m[abcdef]\C-[[22;24m \C-[[00m'
 
   zsh -f -c "source $ZTST_srcdir/../fzf-tab.zsh
     zstyle ':fzf-tab:*' group-colors '<1>' '<2>' '<3>'
@@ -671,10 +671,38 @@
     COLUMNS=80 _ftb_groups=('[ab]' '[abcdef]' '[abc]')
     -ftb-generate-header; print -r -- \"\$_ftb_headers\"
     COLUMNS=20; -ftb-generate-header; print -rl -- \$_ftb_headers" | command sed $'s/\e\\[00m/|/g'
-0:group-header-layout compact: each name followed by one space (group-header-align does not apply), wrapped as needed
-><1>[ab] |<2>[abcdef] |<3>[abc] |
-><1>[ab] |<2>[abcdef] |
-><3>[abc] |
+0:group-header-layout compact: one space on each side of each name (none after the last on a full line), wrapped as needed
+><1> [ab] |<2> [abcdef] |<3> [abc] |
+><1> [ab] |<2> [abcdef]|
+><3> [abc] |
+
+  zsh -f -c "source $ZTST_srcdir/../fzf-tab.zsh
+    zstyle ':fzf-tab:*' group-colors '<1>' '<2>'
+    zstyle ':fzf-tab:*' group-header-layout compact
+    COLUMNS=80 _ftb_groups=('[ab]' '[cd]')
+    zstyle ':fzf-tab:*' group-header-style dim
+    -ftb-generate-header; print -r -- \"\$_ftb_headers\"
+    zstyle ':fzf-tab:*' group-header-style Bold,dim blink
+    -ftb-generate-header; print -r -- \"\$_ftb_headers\"" | command sed $'s/\e\\[00m/|/g; s/\e/^[/g'
+0:group-header-style applies to every name in the header line (words or comma-separated; unknown dropped)
+><1>^[[2m [ab] |<2>^[[2m [cd] |
+><1>^[[1;2m [ab] |<2>^[[1;2m [cd] |
+
+  () {
+    emulate -L zsh
+    local tmp_dir=$ZTST_tmp/dim-header-switch
+    local pid=$$ bs=$'\b'
+    mkdir -p $tmp_dir
+    print -rl -- \
+      $'\e[38;2;0;175;255m\e[2m [ab] \e[00m\e[38;2;135;175;255m\e[2m [cd] \e[00m' \
+      1${bs}$'\e[0m·alpha\0alpha\0' \
+      2${bs}$'\e[0m·beta\0beta\0' \
+      > $tmp_dir/completions.$pid
+    print -rl -- '[ab]' '[cd]' > $tmp_dir/groups.$pid
+    print -r -- ${(q+)${(f)"$($commands[zsh] -f $ZTST_srcdir/../lib/ftb-switch-group $pid 1 bold,underline $tmp_dir 0)"}[1]}
+  }
+0:with a dim header the active name is undimmed (22) before its style
+>$'\C-[[38;2;0;175;255m\C-[[2m [ab] \C-[[00m\C-[[38;2;135;175;255m\C-[[2m \C-[[22;1;4m[cd]\C-[[22;24m \C-[[00m'
 
   () {
     emulate -L zsh
