@@ -328,6 +328,8 @@
 
   mkdir -p popup-bin
   ln -sf $ZTST_srcdir/popup-tmux popup-bin/tmux
+  # the popup needs an fzf on PATH (CI has none); the stub tmux never runs it
+  ln -sf $ZTST_srcdir/select popup-bin/fzf
   fpath=($ZTST_srcdir/../lib $fpath)
   autoload -Uz ftb-tmux-popup
   (
@@ -349,7 +351,7 @@
     export FZF_DEFAULT_OPTS=--cycle
     zstyle ':fzf-tab:*' popup-smart-tab-bindings 'tab:toggle+up' 'btab:toggle+down'
     zstyle ':fzf-tab:*' use-fzf-default-opts yes
-    local fzf_tmux_width_factor=4
+    zstyle ':fzf-tab:*' fzf-tmux-width-factor 4
     print -l abc de | ftb-tmux-popup >/dev/null 2>&1
   )
   print -r -- ${${(f)"$(<popup.log)"}[1]%% -d *}
@@ -417,6 +419,30 @@
 0:popup: focus reporting off around the popup too
 >line: {tst }{}
 >popup-off-and-restored
+
+  comptesteval "export POPUP_LOG=$PWD/popup.log POPUP_SCREEN='0 10 0 5 40 120 on top' TMUX_PANE=%1 PATH=$PWD/popup-bin:\$PATH"
+  comptesteval "zstyle -d ':fzf-tab:*' debug-command; zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup"
+  comptesteval '_tst() { compadd alpha beta }'
+  comptest $'tst \t'
+  print -r -- ${${(f)"$(<popup.log)"}[1]%% -b *}
+  comptesteval "export POPUP_SCREEN='0 10 0 5 40 120 2 top'"
+  comptest $'tst \t'
+  print -r -- ${${(f)"$(<popup.log)"}[1]%% -b *}
+  comptesteval "zstyle -d ':fzf-tab:*' fzf-command; unset TMUX_PANE"
+  comptesteval "zstyle ':fzf-tab:*' debug-command $ZTST_srcdir/select -n 1 -h '\$#_ftb_headers' -q '\"\$_ftb_query\"'"
+0:popup: a status bar on top moves it down by its lines ("on" is one, a number as many)
+>line: {tst }{}
+>popup -x 5 -y 18
+>line: {tst }{}
+>popup -x 5 -y 19
+
+  (
+    export POPUP_LOG=$PWD/popup.log POPUP_SCREEN='0 10 0 5 40 120 on bottom' TMUX_PANE=%1 PATH=$PWD/popup-bin:$PATH
+    print -l abc | ftb-tmux-popup >/dev/null 2>&1
+  )
+  [[ ${${(f)"$(<popup.log)"}[1]} == *' -w 8 '* ]] && print width-factor-default
+0:popup on its own: fzf-tmux-width-factor defaults to 5 (the widest row, 3, plus 5)
+>width-factor-default
 
   comptesteval "export POPUP_LOG=$PWD/popup.log POPUP_SCREEN='0 10 0 5 40 120 on bottom' TMUX_PANE=%1 PATH=$PWD/popup-bin:\$PATH"
   comptesteval "zstyle -d ':fzf-tab:*' debug-command; zstyle ':fzf-tab:*' fzf-command ftb-tmux-popup; zstyle ':fzf-tab:complete:*' fzf-preview 'print -r -- \"word=\$word realpath=\$realpath\"'"
@@ -583,6 +609,50 @@
 0:a custom fzf-command runs as configured (not replaced by ftb-fzf)
 >line: {tst }{}
 >stub-ran
+
+  zsh -f -c "source $ZTST_srcdir/../fzf-tab.zsh; v=\$FZF_TAB_MODULE_VERSION; source $ZTST_srcdir/../fzf-tab.zsh; [[ \$v == \$FZF_TAB_MODULE_VERSION ]] && print same-version" </dev/null 2>&1
+0:sourcing fzf-tab again keeps the C module's version and asks for no rebuild
+>same-version
+
+  zsh -f -c "bindkey -M emacs '^X.' undo; source $ZTST_srcdir/../fzf-tab.zsh; bindkey -M viins '^X.'; disable-fzf-tab; for km in emacs viins; do bindkey -M \$km '^I'; bindkey -M \$km '^X.'; done; print -r -- \${+_ftb_orig_list_grouped} \${+_ftb_orig_binds}" 2>&1
+0:disable-fzf-tab puts back each keymap's Tab and ^X. as it found them
+>"^X." fzf-tab-debug
+>"^I" expand-or-complete
+>"^X." undo
+>"^I" expand-or-complete
+>"^X." undefined-key
+>0 0
+
+  local tdir=$PWD/tmpdir-test
+  command rm -rf $tdir; mkdir -p -m 700 $tdir/xdg
+  zsh -f -c "fpath=($ZTST_srcdir/../lib \$fpath); autoload -Uz -- -ftb-tmp-dir
+    TMPPREFIX=$tdir/t XDG_RUNTIME_DIR=$tdir/xdg
+    -ftb-tmp-dir && [[ \$REPLY == $tdir/t-fzf-tab-\$USER ]] && [[ -n \$REPLY(N/f:go=:) ]] && print made-700
+    command rm -rf \$REPLY; command mkdir -m 775 \$REPLY; -ftb-tmp-dir && [[ -n \$REPLY(N/f:go=:) ]] && print tightened
+    command rm -rf \$REPLY; ln -s $tdir/xdg \$REPLY
+    -ftb-tmp-dir 2>/dev/null && [[ \$REPLY == $tdir/xdg/fzf-tab ]] && print symlink-falls-back
+    unset XDG_RUNTIME_DIR; -ftb-tmp-dir 2>/dev/null || print refused"
+  command rm -rf $tdir
+0:the temporary directory is the user's own, 700, never a symlink (else XDG_RUNTIME_DIR, else none)
+>made-700
+>tightened
+>symlink-falls-back
+>refused
+
+  zsh -f -c "fpath=($ZTST_srcdir/../lib \$fpath); autoload -Uz ftb-fzf; path=(); ftb-fzf --ansi; print -r -- \$?" 2>&1
+0:ftb-fzf without fzf says so (not "command not found: --ansi")
+>[fzf-tab] fzf not found on PATH
+>127
+
+  comptesteval "zstyle -d ':fzf-tab:*' debug-command; _ftb_path=(\$path); path=()"
+  comptesteval '_tst() { compadd alpha beta }'
+  comptest $'tst al\t'
+  local raw=${(j::)logs}
+  comptesteval "path=(\$_ftb_path); zstyle ':fzf-tab:*' debug-command $ZTST_srcdir/select -n 1 -h '\$#_ftb_headers' -q '\"\$_ftb_query\"'"
+  [[ $raw == *"fzf not found on PATH: Tab uses zsh's completion menu"* ]] && print notice
+0:without fzf, Tab is zsh's own completion, with a notice
+>line: {tst alpha }{}
+>notice
 
   comptesteval "ttyfzf() { print -n -- '<FZF>' >/dev/tty }; zstyle -d ':fzf-tab:*' debug-command; zstyle ':fzf-tab:*' fzf-command ttyfzf"
   comptesteval '_tst() { compadd alpha beta }'

@@ -7,8 +7,9 @@ FZF_TAB_HOME="${FZF_TAB_HOME:-${0:A:h}/..}"
 autoload -Uz zmathfunc
 zmathfunc
 
-local tmp_dir=${TMPPREFIX:-/tmp/zsh}-fzf-tab-$USER
-[[ -d $tmp_dir ]] || command mkdir $tmp_dir
+local REPLY
+-ftb-tmp-dir || return 1
+local tmp_dir=$REPLY
 # Files of shells that died while fzf was open (a closed terminal, a killed
 # tmux server) are never removed by their own cleanup below: drop those whose
 # PID suffix (NAME.PID, popup NAME-PID) is no running process. kill -0 is a
@@ -52,7 +53,6 @@ local ret=0
 -ftb-zstyle -s fzf-pad fzf_pad || fzf_pad=2
 -ftb-zstyle -s fzf-min-height fzf_min_height || fzf_min_height=0
 -ftb-zstyle -b use-fzf-default-opts use_fzf_default_opts || use_fzf_default_opts="no"
--ftb-zstyle -s fzf-tmux-width-factor fzf_tmux_width_factor || fzf_tmux_width_factor=5
 -ftb-zstyle -a active-group-style active_group_style || active_group_style=(bold)
 local focus_reporting
 -ftb-zstyle -s focus-reporting focus_reporting || focus_reporting=off
@@ -94,8 +94,8 @@ else
 fi
 
 # ftb-fzf and ftb-tmux-popup are autoloaded functions (fzf-tab.zsh): called by
-# name they run in this shell and see its zstyles, $_ftb_curcontext, $tmp_dir
-# and fzf_tmux_width_factor. Run by path they were a separate zsh with none of
+# name they run in this shell and see its zstyles, $_ftb_curcontext and
+# $tmp_dir. Run by path they were a separate zsh with none of
 # those, so every popup option fell back to its default.
 
 command cat > $tmp_dir/completions.$$

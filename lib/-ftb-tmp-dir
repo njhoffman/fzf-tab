@@ -1,0 +1,31 @@
+#!/hint/zsh
+# -ftb-tmp-dir: sets REPLY to fzf-tab's per-user temporary directory.
+#
+# Its files are sourced (the preview and binding init, the popup's fzf
+# command), so it must be a directory of the user's own, not a symlink, and
+# writable by no one else. The shared path ${TMPPREFIX:-/tmp/zsh}-fzf-tab-$USER
+# is made 700 when missing; when someone else owns it (another user created it
+# first) or it is a symlink, $XDG_RUNTIME_DIR/fzf-tab is used instead, with a
+# notice once per shell. A directory of the user's own that others can read or
+# write (made with the umask before 1.3.0+nj.18) is made 700.
+# Returns 1, with a message, when neither is usable.
+
+emulate -L zsh -o extended_glob
+local shared=${TMPPREFIX:-/tmp/zsh}-fzf-tab-$USER dir
+local -a ok
+for dir in $shared ${XDG_RUNTIME_DIR:+$XDG_RUNTIME_DIR/fzf-tab}; do
+  [[ -e $dir || -L $dir ]] || command mkdir -p -m 700 -- $dir 2>/dev/null
+  [[ -d $dir && ! -L $dir && -O $dir ]] || continue
+  ok=($dir(N/f:go=:))
+  (( $#ok )) || command chmod 700 -- $dir 2>/dev/null
+  ok=($dir(N/f:go=:))
+  (( $#ok )) || continue
+  if [[ $dir != $shared ]] && (( ! $+_ftb_tmp_dir_notice )); then
+    typeset -g _ftb_tmp_dir_notice=1
+    print -ru2 -- "[fzf-tab] $shared is not your own directory (or is a symlink); using $dir"
+  fi
+  REPLY=$dir
+  return 0
+done
+print -ru2 -- "[fzf-tab] no safe temporary directory: $shared is not your own directory (or is a symlink)${XDG_RUNTIME_DIR:+, nor is $XDG_RUNTIME_DIR/fzf-tab}"
+return 1

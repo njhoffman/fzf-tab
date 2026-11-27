@@ -7,6 +7,28 @@ fork counter (`1.3.0+nj.N`, see CLAUDE.md).
 
 ## [Unreleased]
 
+## [1.3.0+nj.18] - 2026-11-26
+
+### Fixed
+
+- Sourcing fzf-tab a second time (`source ~/.zshrc`, a plugin reload) with the C module loaded no
+  longer reports the module out of date and asks to rebuild it.
+- fzf-tab's temporary directory (`${TMPPREFIX:-/tmp/zsh}-fzf-tab-$USER`), whose files previews,
+  bindings and the popup source, must be your own, mode 700 and not a symlink. One that someone
+  else owns (created first on a shared host) or a symlink is not used: fzf-tab moves to
+  `$XDG_RUNTIME_DIR/fzf-tab` with a notice, or stops with a message when that is unset. Your own
+  directory made with the umask by earlier versions is made 700. `fzf-tab-debug`'s logs go there
+  too.
+- The tmux popup is placed correctly below a one-line status bar at the top (tmux reports it as
+  `on`, which counted as 0 lines).
+- `ftb-tmux-popup` on its own (`ls | ftb-tmux-popup`) reads `fzf-tmux-width-factor`, with its
+  default of 5; it used 0.
+- `disable-fzf-tab` puts Tab and `^X.` back in both the emacs and viins keymaps, as it found them,
+  and forgets the saved `list-grouped` setting (a misspelled name kept it).
+- Without fzf on `PATH`, Tab is zsh's own completion menu, with a one-time notice, instead of
+  failing with "command not found: --ansi". `ftb-fzf` and `ftb-tmux-popup` say "fzf not found on
+  PATH" and return 127.
+
 ## [1.3.0+nj.17] - 2026-11-26
 
 ### Fixed

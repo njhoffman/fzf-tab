@@ -1,5 +1,9 @@
 #!/usr/bin/env zsh
 
 # show results with default fzf program
+if (( ! $+commands[fzf] )); then
+  print -ru2 -- "[fzf-tab] fzf not found on PATH"
+  return 127
+fi
 $commands[fzf] $@
 

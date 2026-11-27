@@ -338,9 +338,9 @@ _fzf-tab-apply() {
 fzf-tab-debug() {
   (( $+_ftb_debug_cnt )) || typeset -gi _ftb_debug_cnt
   # per user, next to -ftb-fzf's completion files
-  local logdir=${TMPPREFIX:-/tmp/zsh}-fzf-tab-$USER
-  local debuglog="$logdir/debug-$$-$(( ++_ftb_debug_cnt )).log"
-  [[ -d $logdir ]] || command mkdir -p -m 700 -- $logdir
+  local REPLY
+  -ftb-tmp-dir || return 1
+  local debuglog="$REPLY/debug-$$-$(( ++_ftb_debug_cnt )).log"
 
   local -i debug_fd=-1 IN_FZF_TAB=1
   {
@@ -368,6 +368,22 @@ fzf-tab-complete() {
   # this name must be ugly to avoid clashes
   local -i _ftb_continue=1 _ftb_continue_last=0 _ftb_accept=0 ret=0
   local _ftb_continue_key=
+  # Without fzf, Tab is zsh's own completion menu, with a notice once per
+  # shell: when fzf-command is fzf or ftb-tmux-popup (as set for every
+  # completion, ':fzf-tab:*'), and no debug-command stands in for fzf
+  local _ftb_command
+  zstyle -s ':fzf-tab:' fzf-command _ftb_command || _ftb_command=fzf
+  if (( ! $+commands[fzf] )) && [[ $_ftb_command == (fzf|ftb-tmux-popup) ]] \
+       && ! zstyle -m ':fzf-tab:' debug-command '*'; then
+    if (( ! $+_ftb_no_fzf_notice )); then
+      typeset -g _ftb_no_fzf_notice=1
+      zle -I
+      print -ru2 -- "[fzf-tab] fzf not found on PATH: Tab uses zsh's completion menu"
+    fi
+    zle .fzf-tab-orig-$_ftb_orig_widget
+    return
+  fi
+
   # hide the cursor until finishing completion, so that users won't see cursor up and down
   # NOTE: MacOS Terminal doesn't support civis & cnorm
   echoti civis >/dev/tty 2>/dev/null
@@ -419,13 +435,23 @@ disable-fzf-tab() {
   emulate -L zsh -o extended_glob
   (( $+_ftb_orig_widget )) || return 0
 
-  bindkey '^I' $_ftb_orig_widget
+  # Each keymap's key back to what enable-fzf-tab found there (unbound when it
+  # was), unless it was rebound to something else since
+  local km_key orig
+  for km_key orig in "${(@kv)_ftb_orig_binds}"; do
+    [[ $(builtin bindkey -M ${km_key%% *} -- ${km_key#* }) == *' 'fzf-tab-(complete|debug) ]] || continue
+    if [[ -z $orig || $orig == undefined-key ]]; then
+      builtin bindkey -M ${km_key%% *} -r -- ${km_key#* }
+    else
+      builtin bindkey -M ${km_key%% *} -- ${km_key#* } $orig
+    fi
+  done
   case $_ftb_orig_list_grouped in
     0) zstyle ':completion:*' list-grouped false ;;
     1) zstyle ':completion:*' list-grouped true ;;
     2) zstyle -d ':completion:*' list-grouped ;;
   esac
-  unset _ftb_orig_widget _ftb_orig_list_groupded
+  unset _ftb_orig_widget _ftb_orig_list_grouped _ftb_orig_binds
 
   # unhook compadd so that _approximate can work properply
   unfunction compadd 2>/dev/null
@@ -470,6 +496,14 @@ enable-fzf-tab() {
   typeset -g _ftb_orig_list_grouped=$?
 
   zstyle ':completion:*' list-grouped false
+  # what disable-fzf-tab puts back, per keymap ("keymap key" -> widget)
+  typeset -gA _ftb_orig_binds=()
+  local km key
+  for km in emacs viins; do
+    for key in '^I' '^X.'; do
+      _ftb_orig_binds+=("$km $key" "${$(builtin bindkey -M $km -- $key)##* }")
+    done
+  done
   bindkey -M emacs '^I'  fzf-tab-complete
   bindkey -M viins '^I'  fzf-tab-complete
   bindkey -M emacs '^X.' fzf-tab-debug
@@ -582,9 +616,6 @@ typeset -ga _ftb_group_colors=(
 # init
 () {
   emulate -L zsh -o extended_glob
-  # Ensure we don't keep a stale value around and allow the aloxaf/fzftab module to set it when loaded.
-  unset FZF_TAB_MODULE_VERSION 2>/dev/null
-
   # Ensure we don't keep a stale value around.
   # If the module is loaded, the variable is valid; unsetting would lose it
   # since zmodload won't reload an already-loaded module.
