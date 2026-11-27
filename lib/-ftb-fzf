@@ -63,7 +63,7 @@ local focus_reporting
 }
 
 local -a _active_style_lower=(${(L)active_group_style})
-local -a _active_style_valid=(${(M)_active_style_lower:#(bold|italic|underline|none)})
+local -a _active_style_valid=(${(M)_active_style_lower:#(bold|italic|underline|reverse|none)})
 local -a _active_style_sorted=(${(ou)_active_style_valid})
 local normalized_active_group_style=${${(j:,:)_active_style_sorted}:-none}
 

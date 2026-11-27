@@ -171,8 +171,9 @@ zstyle ':fzf-tab:*' continuous-trigger / ' '
 Group headers:
 
 ```zsh
-# the selected group's header: bold (default), underline, bold,underline, none, and here
-# also italic and bold,italic
+# the selected group's header: bold (default), underline, bold,underline, none, and here any
+# comma-separated combination of bold, italic, underline and reverse (upstream PR #582's
+# reverse and per-style combining, with italic); none wins over the others
 zstyle ':fzf-tab:*' active-group-style bold,italic
 ```
 

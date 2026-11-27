@@ -7,6 +7,20 @@ fork counter (`1.3.0+nj.N`, see CLAUDE.md).
 
 ## [Unreleased]
 
+## [1.3.0+nj.20] - 2026-11-27
+
+### Added
+
+- `active-group-style` takes any comma-separated combination of `bold`, `italic`, `underline` and
+  `reverse` (`reverse,italic`, `bold,underline,reverse`, ...), with `none` overriding the rest;
+  before, only a fixed list of pairs worked. Upstream PR #582's code, with the fork's `italic`.
+
+### Changed
+
+- More tests for the unambiguous fast path: case twins that differ before the last path segment
+  (`A/xaaa`, `a/xaaa`), and upstream PR #605's two unclosed-quote cases. The twins tests now run
+  with zsh about to insert, as in the upstream report, so the fast path's checks really run.
+
 ## [1.3.0+nj.19] - 2026-11-26
 
 ### Added

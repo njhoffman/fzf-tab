@@ -11,32 +11,34 @@ Scanned 2026-11-22: upstream's 88 open issues and 27 open PRs (the fork has issu
 
 - [ ] **Check upstream for new issues, PRs and commits.** (p3) [chore] Recurring, every week or
   two. Last checked 2026-11-26: 88 open issues, 27 open PRs (one new since 2026-11-22: PR #605,
-  item below), upstream/master at 24105b1 (all merged). `git fetch upstream; git log master..upstream/master`; `gh issue list -R
-  Aloxaf/fzf-tab --search "updated:>DATE"` and the same for `gh pr list`. Add an item for each one
-  that affects this setup, merge new commits as CLAUDE.md says, then update the date here. Never
-  comment, open PRs or file issues upstream.
+  item below), upstream/master at 24105b1 (all merged). `git fetch upstream; git log
+  master..upstream/master`; `gh issue list -R Aloxaf/fzf-tab --search "updated:>DATE"` and the
+  same for `gh pr list`. Add an item for each one that affects this setup, merge new commits as
+  CLAUDE.md says, then update the date here. Never comment, open PRs or file issues upstream.
+  Open upstream PRs the fork already carries (re-checked 2026-11-27, all still open): when one
+  merges, take upstream's version in the sync and drop the fork's copy. #543 (`popup-max-height`,
+  `popup-max-width`), #523 (`popup-smart-tab-bindings`), #542 (the `--style` height adjustment),
+  #582 (`active-group-style` combining and `reverse`; the fork adds `italic` to it), #597 and #603
+  (in `-ftb-unambiguous-safe` and the fast-path check), #605 (its tests only).
 
-- [ ] **Take upstream PR #605's unclosed-quote tests.** (p3) [test] #605 (open, stacked on #603)
+- [x] **Take upstream PR #605's unclosed-quote tests.** (p3) [test] #605 (open, stacked on #603)
   fixes Tab doing nothing in an unclosed quote (`tst "foo bar<Tab>` with matches `foo bar1`, `foo
   bar2`). The fork already passes both of its cases (checked 2026-11-26: #597's guard in
   `-ftb-unambiguous-safe` covers them, as the PR says), but has no test for them. Add the two
   ztst cases ("unambiguous prefix in unclosed quote string", with and without a suffix after the
   cursor); its one-line change to the fast-path check (compare with and without the closing quote)
   can wait for the merge.
+  Done 2026-11-27 (1.3.0+nj.20): both cases, after #603's. Two checks in `-ftb-unambiguous-safe`
+  catch the first (#597's typed-prefix check and #576's segment check); with the function forced
+  to allow the fast path it fails, so the test is not trivially passing.
 
-- [ ] **Upstream PRs duplicate the fork's popup features.** (p3) [chore] #543 (`popup-max-height`,
+- [x] **Upstream PRs duplicate the fork's popup features.** (p3) [chore] #543 (`popup-max-height`,
   `popup-max-width`: the fork's names), #523 (`popup-smart-tab-bindings`: same name) and #542 (the
   `--style` height adjustment the fork has) are open upstream by other authors. If they merge,
   take upstream's versions in the next sync and drop the fork's copies. #582 adds `reverse` to
   `active-group-style` next to the fork's `italic`/`bold,italic`: align the token lists.
-
-## Tests
-
-- [ ] **No test isolates the case-twins guard (upstream #600).** (p3) [test] With the
-  `${(L)word} == ${(L)unamb}` check in `-ftb-unambiguous-safe` disabled, the whole suite still
-  passes (checked 2026-11-27, with the file-based twins test and the compadd one alike): another
-  fast-path check stops the insert first in "case-insensitive twins open the picker". Find a case
-  only that check catches (#600's own report), or note which check makes it redundant.
+  Done 2026-11-27 (1.3.0+nj.20): #582's per-style loop adopted, with `italic`; the merge watch for
+  all of them moved to the recurring upstream check above.
 
 ## Completed
 
@@ -312,3 +314,15 @@ Scanned 2026-11-22: upstream's 88 open issues and 27 open PRs (the fork has issu
   does not depend on the filesystem, then see whether macOS passes the rest of the suite.
   Done 2026-11-27: candidates from compadd through `_description` (matcher-list needs its
   options); all three workflows pass, macOS with and without the module (run 45949398264).
+
+### Tests (completed 2026-11-27)
+
+- [x] **No test isolates the case-twins guard (upstream #600).** (p3) [test] With the
+  `${(L)word} == ${(L)unamb}` check in `-ftb-unambiguous-safe` disabled, the whole suite still
+  passes (checked 2026-11-27, with the file-based twins test and the compadd one alike): another
+  fast-path check stops the insert first in "case-insensitive twins open the picker". Find a case
+  only that check catches (#600's own report), or note which check makes it redundant.
+  Done 2026-11-27 (1.3.0+nj.20): the tests ran with `menu true` left by earlier cases, so zsh
+  never inserted and no fast-path check ran. With `menu` unset, the flat twins (`xaaa`, `Xaaa`)
+  are caught by either the twins check or #576's segment check; the new case `A/xaaa`, `a/xaaa`
+  (zsh's string `a/xaaa`, whose last segment is in both) only by the twins check.

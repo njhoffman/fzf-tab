@@ -239,16 +239,28 @@
 
   # candidates from compadd, not files: a filesystem that ignores case (macOS) keeps one of the
   # two. _description passes matcher-list's matchers to compadd (a bare compadd gets none).
-  comptesteval "zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'"
+  # Without the menu style (set by earlier cases) zsh would insert, so the fast path runs (#589).
+  comptesteval "zstyle -d ':completion:*' menu; zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'"
   comptesteval '_tst() { local expl; _description files expl file; compadd "$expl[@]" Xaaa xaaa }'
   comptest $'tst x\t'
-  comptesteval 'zstyle -d ":completion:*" matcher-list'
 0:case-insensitive twins open the picker (this debug-command picks nothing)
 >line: {tst x}{}
 >QUERY:{}
 >DESCRIPTION:{file}
 >C1:{Xaaa}
 >C1:{xaaa}
+
+  # zsh's string is a/xaaa; its last segment is in both words, so only the twins check
+  # (the words are equal ignoring case) keeps the fast path from inserting a/xaaa
+  comptesteval '_tst() { local expl; _description files expl file; compadd "$expl[@]" A/xaaa a/xaaa }'
+  comptest $'tst a\t'
+  comptesteval "zstyle -d ':completion:*' matcher-list; zstyle ':completion:*' menu true"
+0:case-insensitive twins that differ before the last segment open the picker (upstream #589)
+>line: {tst a}{}
+>QUERY:{}
+>DESCRIPTION:{file}
+>C1:{A/xaaa}
+>C1:{a/xaaa}
 
   comptesteval "zstyle ':fzf-tab:*' debug-command $ZTST_srcdir/select -n QUERY -h '\$#headers' -q '\"dragon\"'"
   comptest $': ./d\t'
@@ -539,6 +551,22 @@
 >C0:{abc1x}
 >C0:{abc2x}
 
+  comptesteval '_tst() { compadd "foo bar1" "foo bar2" }'
+  comptest $'tst "foo bar\t'
+0:unambiguous prefix in unclosed quote string (upstream PR #605)
+>line: {tst "foo bar1" }{}
+>QUERY:{foo bar}
+>C0:{foo bar1}
+>C0:{foo bar2}
+
+  comptesteval '_tst() { compadd "foo bar1x" "foo bar2x" }'
+  comptest $'tst "foo barx\C-b\t'
+0:unambiguous prefix in unclosed quote string with suffix after cursor (upstream PR #605)
+>line: {tst "foo bar1x" }{}
+>QUERY:{foo bar}
+>C0:{foo bar1x}
+>C0:{foo bar2x}
+
 
   () {
     emulate -L zsh -o extended_glob
@@ -583,6 +611,28 @@
       [[ $switched[2] == 2${bs}$'\e[0m·beta\0beta\0' ]]
   }
 0:group switching uses hidden identity when colors are identical
+
+  () {
+    emulate -L zsh
+    local tmp_dir=$ZTST_tmp/active-style-combos
+    local pid=$$ bs=$'\b' style
+    mkdir -p $tmp_dir
+    print -rl -- \
+      $'\e[0mgroup one  \e[00m\e[0mgroup two\e[00m' \
+      1${bs}$'\e[0m·alpha\0alpha\0' \
+      2${bs}$'\e[0m·beta\0beta\0' \
+      > $tmp_dir/completions.$pid
+    print -rl -- 'group one' 'group two' > $tmp_dir/groups.$pid
+    # as -ftb-fzf passes them: valid tokens, sorted, comma-joined
+    for style in italic,reverse bold,italic,reverse,underline bold,none; do
+      rm -f $tmp_dir/current-group.$pid
+      print -r -- "$style ${(q+)${(f)"$($commands[zsh] -f $ZTST_srcdir/../lib/ftb-switch-group $pid 1 $style $tmp_dir 0)"}[1]}"
+    done
+  }
+0:active-group-style combines any styles, reverse among them; none wins (upstream PR #582)
+>italic,reverse $'\C-[[0mgroup one  \C-[[00m\C-[[0m\C-[[3;7mgroup two\C-[[23;27m\C-[[00m'
+>bold,italic,reverse,underline $'\C-[[0mgroup one  \C-[[00m\C-[[0m\C-[[1;3;7;4mgroup two\C-[[22;23;27;24m\C-[[00m'
+>bold,none $'\C-[[0mgroup one  \C-[[00m\C-[[0mgroup two\C-[[00m'
 
   () {
     emulate -L zsh

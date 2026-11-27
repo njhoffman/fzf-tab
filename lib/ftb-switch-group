@@ -35,17 +35,44 @@ fi
 (( current == 0 )) && current=$#group_ids
 echo $current > $tmp_dir/current-group.$pid
 
-# configure style of active header
-local sgr_on='' sgr_off=''
-case $active_group_style in
-  (bold)          sgr_on=$'\x1b[1m';    sgr_off=$'\x1b[22m' ;;
-  (underline)     sgr_on=$'\x1b[4m';    sgr_off=$'\x1b[24m' ;;
-  (bold,underline) sgr_on=$'\x1b[1;4m'; sgr_off=$'\x1b[22;24m' ;;
-  (italic)        sgr_on=$'\x1b[3m';    sgr_off=$'\x1b[23m' ;;
-  (bold,italic)   sgr_on=$'\x1b[1;3m';  sgr_off=$'\x1b[22;23m' ;;
-  (none)          sgr_on='';            sgr_off='' ;;
-  (*)             sgr_on=$'\x1b[1m';    sgr_off=$'\x1b[22m' ;;  # fallback
-esac
+# configure style of active header: any comma-separated combination of bold,
+# italic, underline and reverse (none wins over the others), as in upstream
+# PR #582 (which has no italic)
+local sgr_on='' sgr_off='' style
+local -a active_style_tokens sgr_on_codes sgr_off_codes
+active_style_tokens=(${(s:,:)active_group_style})
+
+if (( ${active_style_tokens[(I)none]} )); then
+  active_style_tokens=(none)
+fi
+
+for style in $active_style_tokens; do
+  case $style in
+    (bold)
+      sgr_on_codes+=(1)
+      sgr_off_codes+=(22)
+      ;;
+    (italic)
+      sgr_on_codes+=(3)
+      sgr_off_codes+=(23)
+      ;;
+    (underline)
+      sgr_on_codes+=(4)
+      sgr_off_codes+=(24)
+      ;;
+    (reverse)
+      sgr_on_codes+=(7)
+      sgr_off_codes+=(27)
+      ;;
+    (none)
+      ;;
+  esac
+done
+
+if (( $#sgr_on_codes )); then
+  sgr_on=$'\x1b['${(j:;:)sgr_on_codes}$'m'
+  sgr_off=$'\x1b['${(j:;:)sgr_off_codes}$'m'
+fi
 
 # The hidden marker on every line in the selected group, and its label.
 local current_marker='' current_group=''
