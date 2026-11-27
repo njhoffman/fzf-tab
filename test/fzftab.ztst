@@ -664,6 +664,18 @@
 ><1>  [ab]   |<2>[abcdef] |
 ><3>  [abc]  |
 
+  zsh -f -c "source $ZTST_srcdir/../fzf-tab.zsh
+    zstyle ':fzf-tab:*' group-colors '<1>' '<2>' '<3>'
+    zstyle ':fzf-tab:*' group-header-layout compact
+    zstyle ':fzf-tab:*' group-header-align center
+    COLUMNS=80 _ftb_groups=('[ab]' '[abcdef]' '[abc]')
+    -ftb-generate-header; print -r -- \"\$_ftb_headers\"
+    COLUMNS=20; -ftb-generate-header; print -rl -- \$_ftb_headers" | command sed $'s/\e\\[00m/|/g'
+0:group-header-layout compact: each name followed by one space (group-header-align does not apply), wrapped as needed
+><1>[ab] |<2>[abcdef] |<3>[abc] |
+><1>[ab] |<2>[abcdef] |
+><3>[abc] |
+
   () {
     emulate -L zsh
     local tmp_dir=$ZTST_tmp/ungrouped-reset-colors

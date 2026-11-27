@@ -7,6 +7,14 @@ fork counter (`1.3.0+nj.N`, see CLAUDE.md).
 
 ## [Unreleased]
 
+## [1.3.0+nj.22] - 2026-11-27
+
+### Added
+
+- `group-header-layout compact` puts one space after each group name in the header line instead
+  of columns as wide as the longest name (default `columns`; `group-header-align` applies to
+  columns only).
+
 ## [1.3.0+nj.21] - 2026-11-27
 
 ### Added

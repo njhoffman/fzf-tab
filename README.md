@@ -176,7 +176,10 @@ Group headers:
 # per-style combining, with italic), as separate words (bold italic, upstream's form) or
 # comma-separated (bold,italic); none wins over the others
 zstyle ':fzf-tab:*' active-group-style bold,italic
-# the group names in the header line: left (default) or centered in their columns
+# the header line's layout: columns (default), each name in a column as wide as the longest,
+# or compact, each name followed by one space
+zstyle ':fzf-tab:*' group-header-layout compact
+# with columns, each name left (default) or centered in its column
 zstyle ':fzf-tab:*' group-header-align center
 ```
 
